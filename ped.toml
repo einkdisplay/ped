@@ -1,0 +1,33 @@
+[page]
+url = "dashboard/index.html"
+script = ["dashboard/ped.js"]
+trusted_origins = ["http://127.0.0.1"]
+allowed_origins = ["http://127.0.0.1"]
+
+[display]
+auto_refresh = true
+refresh_interval_ms = 2500
+waveform = "quality"
+periodic_full_refresh = true
+full_refresh_interval = 20
+wait_for_complete = false
+
+[control]
+socket = "/tmp/ped.sock"
+max_script_bytes = 65536
+max_event_detail_bytes = 32768
+max_request_bytes = 131072
+queue_capacity = 32
+
+[lifecycle]
+enabled = false
+marker = "/var/run/ped/session.json"
+service = "lab126_gui"
+stop_timeout_ms = 3000
+watchdog_timeout_s = 30
+
+[static_server]
+enabled = true
+bind = "127.0.0.1"
+port = 0
+prefix = "/"

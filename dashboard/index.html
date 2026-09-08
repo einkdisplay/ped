@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=1072, initial-scale=1">
+    <title>PED hardware check</title>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <main>
+      <header>
+        <p class="eyebrow">PED hardware validation</p>
+        <h1 id="clock">--:--:--</h1>
+        <p id="date-line">waiting for first DOM tick</p>
+      </header>
+
+      <section class="hero" id="phase" data-phase="0">
+        <div class="hero-label">DOM tick</div>
+        <div class="hero-value" id="tick">0</div>
+        <div class="hero-note" id="phase-label">boot</div>
+      </section>
+
+      <section class="grid">
+        <article class="card">
+          <span>Runtime event</span>
+          <strong id="runtime">starting</strong>
+        </article>
+        <article class="card">
+          <span>Last DOM mutation</span>
+          <strong id="updated">waiting</strong>
+        </article>
+        <article class="card">
+          <span>navigator.kindle</span>
+          <strong id="kindle-api">checking</strong>
+        </article>
+        <article class="card">
+          <span>Page uptime</span>
+          <strong id="uptime">0s</strong>
+        </article>
+      </section>
+
+      <section class="banner" id="banner">
+        If this text and the black/white blocks change every few seconds,
+        Servo JS + SWGL + FBInk auto-refresh is working on device.
+      </section>
+
+      <section class="bars" id="bars" aria-hidden="true"></section>
+
+      <footer>
+        <p>
+          Auto refresh is driven by PED itself (~2.5s). This page only mutates
+          the DOM. It does not require <code>navigator.kindle.screen.refreshNow</code>.
+        </p>
+        <p id="checklist">
+          Watch: clock · tick · phase invert · moving bars · banner text
+        </p>
+      </footer>
+    </main>
+    <script src="page.js"></script>
+  </body>
+</html>

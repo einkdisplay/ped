@@ -1,0 +1,11 @@
+/target/
+**/*.log
+.DS_Store
+*.swp
+.idea/
+.vscode/
+x11-egl-*.c
+x11-glx-*.c
+
+# Local Cargo path patches (not published; fork later)
+/vendor/

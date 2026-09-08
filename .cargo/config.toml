@@ -1,0 +1,11 @@
+[target.armv7-unknown-linux-musleabihf]
+linker = "armv7-unknown-linux-musleabihf-gcc"
+rustflags = [
+    "-C",
+    "link-arg=-Wl,--allow-multiple-definition",
+    "-C",
+    "link-arg=-lgcc",
+]
+
+[env]
+RUST_FONTCONFIG_DLOPEN = "1"

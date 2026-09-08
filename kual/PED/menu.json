@@ -1,0 +1,20 @@
+{
+  "items": [
+    {
+      "name": "Start PED",
+      "action": "./start.sh"
+    },
+    {
+      "name": "Stop PED",
+      "action": "./stop.sh"
+    },
+    {
+      "name": "PED Status",
+      "action": "./status.sh"
+    },
+    {
+      "name": "Reload PED Config",
+      "action": "./reload.sh"
+    }
+  ]
+}
