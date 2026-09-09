@@ -74,12 +74,24 @@ orientation = "landscape"
 
 ## 为 PED 编写网页
 
-### TypeScript 类型
+### 参考 Dashboard
+
+如果你只是想试用 PED，不一定要自己写代码。[einkdisplay/dashboard](https://github.com/einkdisplay/dashboard)
+是一个示例 PED dashboard。如果你不需要自己的 dashboard 页面，可以直接用它。
+
+### `navigator.kindle` API
+
+PED 提供了 `navigator.kindle` API，用来控制页面如何刷新，以及查询设备自身的指标。
+
+#### 文档
+
+见 [TypeScript 定义文件](./js-binding/index.d.ts) 中的 JSDoc 注释。
+
+#### TypeScript 类型
 
 [![NPM Version](https://img.shields.io/npm/v/potatoeinkdisplay-types)](https://npmjs.com/package/potatoeinkdisplay-types)
 
-你可以用 PED 的浏览器 Kindle API（`window.navigator.kindle`）来读取设备信息（网络、屏幕和电池）以及控制屏幕刷新。我们将相应的 TypeScript
-类型定义发布到了 NPM，包名是 `potatoeinkdisplay-types`。
+该 API 的 TypeScript 类型定义已发布到 npm，包名是 `potatoeinkdisplay-types`。
 
 你可以把它安装成 `devDependencies`：
 
@@ -93,7 +105,29 @@ pnpm add -D potatoeinkdisplay-types
 /// <reference types="potatoeinkdisplay-types" />
 ```
 
-来让 TypeScript 编译器认识 PED 的类型。
+来让 TypeScript 编译器认识 PED 的全局类型。
+
+#### Polyfill
+
+[![NPM Version](https://img.shields.io/npm/v/potatoeinkdisplay-polyfill)](https://npmjs.com/package/potatoeinkdisplay-polyfill)
+
+在普通浏览器里调试页面时，你可能需要给 `navigator.kindle` API 做 polyfill。
+
+我们官方提供了对应的 polyfill。安装即可：
+
+```bash
+pnpm add potatoeinkdisplay-polyfill
+```
+
+然后在页面的 JS 入口中导入：
+
+```typescript
+import "potatoeinkdisplay-polyfill";
+```
+
+这样就完成了！
+
+即使在真正的 PED 上导入这个 polyfill 也没问题。如果已经存在 `navigator.kindle` API，它会跳过 polyfill。
 
 ### 测试
 
