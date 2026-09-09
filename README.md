@@ -170,7 +170,4 @@ how your page renders there.
 
 ## License
 
-MIT
-
-> This repository vendors [FBInk code under `crates/fbink-sys/`](./crates/fbink-sys/),
-> which remains licensed under GPLv3.
+GPLv3 or later
