@@ -21,8 +21,8 @@ Supported control methods are `status`, `open`, `eval`, `emit`, `refresh`,
 `reload-config`, and `stop`. `open` is origin-allowlisted. `reload-config` hot-applies display/control/origin settings when possible and
 returns `restart_required` only for structural changes (socket, page, lifecycle, static server).
 
-KUAL and Scriptlet launch assets are under `kual/` and `scriptlet/`. An independent
-lifecycle helper is available as `bin/ped-watchdog.sh`. They use
+KUAL and Scriptlet launch assets are under `apps/kual/` and `apps/scriptlet/`. An independent
+lifecycle helper is available as `scripts/ped-watchdog.sh`. They use
 the same binary and control path. Set `lifecycle.enabled = true` only on a
 jailbroken Kindle where `/dev/fb0` and `/sbin/start`/`/sbin/stop` exist. PED
 then records a marker, stops `lab126_gui`, and attempts to restore it during
@@ -109,14 +109,15 @@ long-running operation, crash recovery, and actual KUAL installation.
 
 ## Source layout
 
-PED expects sibling checkouts (path dependencies):
+PED expects sibling checkouts (git dependencies on the einkdisplay forks:
 
 ```text
-workspace/
-  PED/          # this repo
-  servo/        # https://github.com/einkdisplay/servo (branch kindle-fontconfigless)
-  mozjs/        # https://github.com/einkdisplay/mozjs (branch kindle-armv7-musl)
-  FBInk/        # https://github.com/NiLuJe/FBInk (upstream)
+servo        https://github.com/einkdisplay/servo        (kindle-fontconfigless)
+mozjs_sys    https://github.com/einkdisplay/mozjs        (kindle-armv7-musl)
+freetype-sys https://github.com/einkdisplay/freetype-sys (master)
 ```
+
+FBInk C sources used by `fbink-sys` are vendored under
+`crates/fbink-sys/vendor/fbink/`.
 
 TypeScript API draft: `kindle.d.ts` in this repository root.

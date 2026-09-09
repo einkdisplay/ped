@@ -9,18 +9,29 @@ fn main() {
     );
 
     let manifest_dir = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
-    let fbink_dir = manifest_dir.join("../../FBInk");
+    let fbink_dir = manifest_dir.join("vendor/fbink");
     let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
     let sysroot = "/usr/local/musl/armv7-unknown-linux-musleabihf";
 
-    println!(
-        "cargo:rerun-if-changed={}",
-        fbink_dir.join("fbink.h").display()
-    );
-    println!(
-        "cargo:rerun-if-changed={}",
-        fbink_dir.join("fbink.c").display()
-    );
+    for rel in [
+        "fbink.h",
+        "fbink.c",
+        "fbink_internal.h",
+        "cutef8/utf8.c",
+        "cutef8/dfa.c",
+        "qimagescale/qimagescale.c",
+        "../wrapper.h",
+    ] {
+        println!(
+            "cargo:rerun-if-changed={}",
+            if rel.starts_with("../") {
+                manifest_dir.join(rel.trim_start_matches("../")).display().to_string()
+            } else {
+                fbink_dir.join(rel).display().to_string()
+            }
+        );
+    }
+    // wrapper lives next to build.rs
     println!(
         "cargo:rerun-if-changed={}",
         manifest_dir.join("wrapper.h").display()

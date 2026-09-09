@@ -1,24 +1,12 @@
-[package]
-name = "ped"
-version = "0.1.0"
-edition = "2024"
-publish = false
+[workspace]
+members = ["crates/*"]
+resolver = "2"
+default-members = ["crates/ped"]
 
-[dependencies]
-# Servo's software context uses dpi sizes directly.
-dpi = "0.1"
-embedder_traits = { package = "servo-embedder-traits", path = "../servo/components/shared/embedder" }
-fbink-sys = { path = "fbink-sys" }
-libc = "0.2"
-rand_core = "0.9"
-rand_jitter = { version = "0.5", features = ["std"] }
-serde = { version = "1", features = ["derive"] }
-serde_json = "1"
-servo = { path = "../servo/components/servo", default-features = false, features = ["bundled", "js_jit"] }
-servo-base = { path = "../servo/components/shared/base" }
-fontconfig_sys = { package = "yeslogic-fontconfig-sys", version = "6", features = ["dlopen"] }
-toml = "0.9"
-url = "2"
+[workspace.package]
+edition = "2024"
+version = "0.1.0"
+publish = false
 
 [profile.release]
 codegen-units = 1
@@ -26,8 +14,7 @@ lto = "thin"
 panic = "abort"
 strip = "symbols"
 
+# Kindle/ARMv7 forks used in place of crates.io / stock Servo deps.
 [patch.crates-io]
-freetype-sys = { path = "vendor/freetype-sys" }
-mozjs_sys = { path = "../mozjs/mozjs-sys" }
-surfman = { path = "vendor/surfman" }
-
+freetype-sys = { git = "https://github.com/einkdisplay/freetype-sys", branch = "master" }
+mozjs_sys = { git = "https://github.com/einkdisplay/mozjs", branch = "kindle-armv7-musl" }

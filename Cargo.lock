@@ -1600,6 +1600,7 @@ dependencies = [
 [[package]]
 name = "freetype-sys"
 version = "0.23.0"
+source = "git+https://github.com/einkdisplay/freetype-sys?branch=master#05a04c8d916f3ac592d1a7841b96e316eee72462"
 dependencies = [
  "cc",
  "libz-sys",
@@ -3240,6 +3241,7 @@ dependencies = [
 [[package]]
 name = "mozjs_collator_glue"
 version = "153.0.0"
+source = "git+https://github.com/einkdisplay/mozjs?branch=kindle-armv7-musl#4b4e8e173a9bd76e10dee0d2a333e12657dbed7e"
 dependencies = [
  "arraystring",
  "arrayvec",
@@ -3253,6 +3255,7 @@ dependencies = [
 [[package]]
 name = "mozjs_icu_collator"
 version = "153.0.0"
+source = "git+https://github.com/einkdisplay/mozjs?branch=kindle-armv7-musl#4b4e8e173a9bd76e10dee0d2a333e12657dbed7e"
 dependencies = [
  "displaydoc",
  "icu_locale",
@@ -3272,10 +3275,12 @@ dependencies = [
 [[package]]
 name = "mozjs_icu_collator_data"
 version = "153.0.0"
+source = "git+https://github.com/einkdisplay/mozjs?branch=kindle-armv7-musl#4b4e8e173a9bd76e10dee0d2a333e12657dbed7e"
 
 [[package]]
 name = "mozjs_icu_collections"
 version = "153.0.0"
+source = "git+https://github.com/einkdisplay/mozjs?branch=kindle-armv7-musl#4b4e8e173a9bd76e10dee0d2a333e12657dbed7e"
 dependencies = [
  "displaydoc",
  "icu_casemap",
@@ -3289,6 +3294,7 @@ dependencies = [
 [[package]]
 name = "mozjs_icu_normalizer"
 version = "153.0.0"
+source = "git+https://github.com/einkdisplay/mozjs?branch=kindle-armv7-musl#4b4e8e173a9bd76e10dee0d2a333e12657dbed7e"
 dependencies = [
  "displaydoc",
  "icu_properties 2.1.2",
@@ -3305,10 +3311,12 @@ dependencies = [
 [[package]]
 name = "mozjs_icu_normalizer_data"
 version = "153.0.0"
+source = "git+https://github.com/einkdisplay/mozjs?branch=kindle-armv7-musl#4b4e8e173a9bd76e10dee0d2a333e12657dbed7e"
 
 [[package]]
 name = "mozjs_locale_glue"
 version = "153.0.0"
+source = "git+https://github.com/einkdisplay/mozjs?branch=kindle-armv7-musl#4b4e8e173a9bd76e10dee0d2a333e12657dbed7e"
 dependencies = [
  "cbindgen",
  "icu_locale",
@@ -3317,6 +3325,7 @@ dependencies = [
 [[package]]
 name = "mozjs_normalizer_glue"
 version = "153.0.0"
+source = "git+https://github.com/einkdisplay/mozjs?branch=kindle-armv7-musl#4b4e8e173a9bd76e10dee0d2a333e12657dbed7e"
 dependencies = [
  "cbindgen",
  "encoding_rs",
@@ -3328,6 +3337,7 @@ dependencies = [
 [[package]]
 name = "mozjs_properties_glue"
 version = "153.0.0"
+source = "git+https://github.com/einkdisplay/mozjs?branch=kindle-armv7-musl#4b4e8e173a9bd76e10dee0d2a333e12657dbed7e"
 dependencies = [
  "cbindgen",
  "icu_casemap",
@@ -3338,6 +3348,7 @@ dependencies = [
 [[package]]
 name = "mozjs_sys"
 version = "153.0.0-0"
+source = "git+https://github.com/einkdisplay/mozjs?branch=kindle-armv7-musl#4b4e8e173a9bd76e10dee0d2a333e12657dbed7e"
 dependencies = [
  "bindgen",
  "cc",
@@ -3359,6 +3370,7 @@ dependencies = [
 [[package]]
 name = "mozjs_unicode_bidi_ffi"
 version = "153.0.0"
+source = "git+https://github.com/einkdisplay/mozjs?branch=kindle-armv7-musl#4b4e8e173a9bd76e10dee0d2a333e12657dbed7e"
 dependencies = [
  "cbindgen",
  "icu_properties 2.1.2",
@@ -3368,6 +3380,7 @@ dependencies = [
 [[package]]
 name = "mozjs_utf16_iter"
 version = "153.0.0"
+source = "git+https://github.com/einkdisplay/mozjs?branch=kindle-armv7-musl#4b4e8e173a9bd76e10dee0d2a333e12657dbed7e"
 dependencies = [
  "mozjs_icu_collections",
 ]
@@ -3375,6 +3388,7 @@ dependencies = [
 [[package]]
 name = "mozjs_utf8_iter"
 version = "153.0.0"
+source = "git+https://github.com/einkdisplay/mozjs?branch=kindle-armv7-musl#4b4e8e173a9bd76e10dee0d2a333e12657dbed7e"
 dependencies = [
  "mozjs_icu_collections",
 ]
@@ -4742,6 +4756,7 @@ dependencies = [
 [[package]]
 name = "servo"
 version = "0.6.0"
+source = "git+https://github.com/einkdisplay/servo?branch=kindle-fontconfigless#9f19a88ec22ee68b74137c310355154a2f33aa48"
 dependencies = [
  "accesskit",
  "bitflags 2.13.1",
@@ -4802,6 +4817,7 @@ dependencies = [
 [[package]]
 name = "servo-allocator"
 version = "0.6.0"
+source = "git+https://github.com/einkdisplay/servo?branch=kindle-fontconfigless#9f19a88ec22ee68b74137c310355154a2f33aa48"
 dependencies = [
  "libc",
  "windows-sys 0.61.2",
@@ -4810,6 +4826,7 @@ dependencies = [
 [[package]]
 name = "servo-background-hang-monitor"
 version = "0.6.0"
+source = "git+https://github.com/einkdisplay/servo?branch=kindle-fontconfigless#9f19a88ec22ee68b74137c310355154a2f33aa48"
 dependencies = [
  "backtrace",
  "crossbeam-channel",
@@ -4824,6 +4841,7 @@ dependencies = [
 [[package]]
 name = "servo-background-hang-monitor-api"
 version = "0.6.0"
+source = "git+https://github.com/einkdisplay/servo?branch=kindle-fontconfigless#9f19a88ec22ee68b74137c310355154a2f33aa48"
 dependencies = [
  "serde",
  "servo-base",
@@ -4832,6 +4850,7 @@ dependencies = [
 [[package]]
 name = "servo-base"
 version = "0.6.0"
+source = "git+https://github.com/einkdisplay/servo?branch=kindle-fontconfigless#9f19a88ec22ee68b74137c310355154a2f33aa48"
 dependencies = [
  "accesskit",
  "crossbeam-channel",
@@ -4857,6 +4876,7 @@ dependencies = [
 [[package]]
 name = "servo-canvas"
 version = "0.6.0"
+source = "git+https://github.com/einkdisplay/servo?branch=kindle-fontconfigless#9f19a88ec22ee68b74137c310355154a2f33aa48"
 dependencies = [
  "bytemuck",
  "crossbeam-channel",
@@ -4882,6 +4902,7 @@ dependencies = [
 [[package]]
 name = "servo-canvas-traits"
 version = "0.6.0"
+source = "git+https://github.com/einkdisplay/servo?branch=kindle-fontconfigless#9f19a88ec22ee68b74137c310355154a2f33aa48"
 dependencies = [
  "crossbeam-channel",
  "euclid",
@@ -4904,6 +4925,7 @@ dependencies = [
 [[package]]
 name = "servo-config"
 version = "0.6.0"
+source = "git+https://github.com/einkdisplay/servo?branch=kindle-fontconfigless#9f19a88ec22ee68b74137c310355154a2f33aa48"
 dependencies = [
  "num_enum",
  "serde",
@@ -4916,6 +4938,7 @@ dependencies = [
 [[package]]
 name = "servo-config-macro"
 version = "0.6.0"
+source = "git+https://github.com/einkdisplay/servo?branch=kindle-fontconfigless#9f19a88ec22ee68b74137c310355154a2f33aa48"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -4926,6 +4949,7 @@ dependencies = [
 [[package]]
 name = "servo-constellation"
 version = "0.6.0"
+source = "git+https://github.com/einkdisplay/servo?branch=kindle-fontconfigless#9f19a88ec22ee68b74137c310355154a2f33aa48"
 dependencies = [
  "accesskit",
  "backtrace",
@@ -4969,6 +4993,7 @@ dependencies = [
 [[package]]
 name = "servo-constellation-traits"
 version = "0.6.0"
+source = "git+https://github.com/einkdisplay/servo?branch=kindle-fontconfigless#9f19a88ec22ee68b74137c310355154a2f33aa48"
 dependencies = [
  "base64 0.23.1",
  "content-security-policy",
@@ -5002,6 +5027,7 @@ dependencies = [
 [[package]]
 name = "servo-default-resources"
 version = "0.6.0"
+source = "git+https://github.com/einkdisplay/servo?branch=kindle-fontconfigless#9f19a88ec22ee68b74137c310355154a2f33aa48"
 dependencies = [
  "servo-embedder-traits",
 ]
@@ -5009,6 +5035,7 @@ dependencies = [
 [[package]]
 name = "servo-deny-public-fields"
 version = "0.6.0"
+source = "git+https://github.com/einkdisplay/servo?branch=kindle-fontconfigless#9f19a88ec22ee68b74137c310355154a2f33aa48"
 dependencies = [
  "proc-macro2",
  "syn 2.0.119",
@@ -5018,6 +5045,7 @@ dependencies = [
 [[package]]
 name = "servo-devtools"
 version = "0.6.0"
+source = "git+https://github.com/einkdisplay/servo?branch=kindle-fontconfigless#9f19a88ec22ee68b74137c310355154a2f33aa48"
 dependencies = [
  "atomic_refcell",
  "base64 0.23.1",
@@ -5047,6 +5075,7 @@ dependencies = [
 [[package]]
 name = "servo-devtools-traits"
 version = "0.6.0"
+source = "git+https://github.com/einkdisplay/servo?branch=kindle-fontconfigless#9f19a88ec22ee68b74137c310355154a2f33aa48"
 dependencies = [
  "bytes",
  "http 1.5.0",
@@ -5064,6 +5093,7 @@ dependencies = [
 [[package]]
 name = "servo-dom-struct"
 version = "0.6.0"
+source = "git+https://github.com/einkdisplay/servo?branch=kindle-fontconfigless#9f19a88ec22ee68b74137c310355154a2f33aa48"
 dependencies = [
  "prettyplease",
  "proc-macro2",
@@ -5074,6 +5104,7 @@ dependencies = [
 [[package]]
 name = "servo-embedder-traits"
 version = "0.6.0"
+source = "git+https://github.com/einkdisplay/servo?branch=kindle-fontconfigless#9f19a88ec22ee68b74137c310355154a2f33aa48"
 dependencies = [
  "accesskit",
  "bitflags 2.13.1",
@@ -5107,6 +5138,7 @@ dependencies = [
 [[package]]
 name = "servo-fonts"
 version = "0.6.0"
+source = "git+https://github.com/einkdisplay/servo?branch=kindle-fontconfigless#9f19a88ec22ee68b74137c310355154a2f33aa48"
 dependencies = [
  "app_units",
  "atomic_refcell",
@@ -5165,6 +5197,7 @@ dependencies = [
 [[package]]
 name = "servo-fonts-traits"
 version = "0.6.0"
+source = "git+https://github.com/einkdisplay/servo?branch=kindle-fontconfigless#9f19a88ec22ee68b74137c310355154a2f33aa48"
 dependencies = [
  "atomic_refcell",
  "dwrote",
@@ -5189,6 +5222,7 @@ dependencies = [
 [[package]]
 name = "servo-geometry"
 version = "0.6.0"
+source = "git+https://github.com/einkdisplay/servo?branch=kindle-fontconfigless#9f19a88ec22ee68b74137c310355154a2f33aa48"
 dependencies = [
  "app_units",
  "euclid",
@@ -5201,6 +5235,7 @@ dependencies = [
 [[package]]
 name = "servo-hyper-serde"
 version = "0.6.0"
+source = "git+https://github.com/einkdisplay/servo?branch=kindle-fontconfigless#9f19a88ec22ee68b74137c310355154a2f33aa48"
 dependencies = [
  "cookie 0.18.2",
  "headers",
@@ -5214,6 +5249,7 @@ dependencies = [
 [[package]]
 name = "servo-jstraceable-derive"
 version = "0.6.0"
+source = "git+https://github.com/einkdisplay/servo?branch=kindle-fontconfigless#9f19a88ec22ee68b74137c310355154a2f33aa48"
 dependencies = [
  "proc-macro2",
  "syn 2.0.119",
@@ -5223,6 +5259,7 @@ dependencies = [
 [[package]]
 name = "servo-layout"
 version = "0.6.0"
+source = "git+https://github.com/einkdisplay/servo?branch=kindle-fontconfigless#9f19a88ec22ee68b74137c310355154a2f33aa48"
 dependencies = [
  "accesskit",
  "app_units",
@@ -5282,6 +5319,7 @@ dependencies = [
 [[package]]
 name = "servo-layout-api"
 version = "0.6.0"
+source = "git+https://github.com/einkdisplay/servo?branch=kindle-fontconfigless#9f19a88ec22ee68b74137c310355154a2f33aa48"
 dependencies = [
  "app_units",
  "atomic_refcell",
@@ -5315,6 +5353,7 @@ dependencies = [
 [[package]]
 name = "servo-malloc-size-of"
 version = "0.6.0"
+source = "git+https://github.com/einkdisplay/servo?branch=kindle-fontconfigless#9f19a88ec22ee68b74137c310355154a2f33aa48"
 dependencies = [
  "app_units",
  "atomic_refcell",
@@ -5360,6 +5399,7 @@ dependencies = [
 [[package]]
 name = "servo-media"
 version = "0.6.0"
+source = "git+https://github.com/einkdisplay/servo?branch=kindle-fontconfigless#9f19a88ec22ee68b74137c310355154a2f33aa48"
 dependencies = [
  "servo-base",
  "servo-media-audio",
@@ -5372,6 +5412,7 @@ dependencies = [
 [[package]]
 name = "servo-media-audio"
 version = "0.6.0"
+source = "git+https://github.com/einkdisplay/servo?branch=kindle-fontconfigless#9f19a88ec22ee68b74137c310355154a2f33aa48"
 dependencies = [
  "byte-slice-cast",
  "euclid",
@@ -5396,6 +5437,7 @@ dependencies = [
 [[package]]
 name = "servo-media-derive"
 version = "0.6.0"
+source = "git+https://github.com/einkdisplay/servo?branch=kindle-fontconfigless#9f19a88ec22ee68b74137c310355154a2f33aa48"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -5405,6 +5447,7 @@ dependencies = [
 [[package]]
 name = "servo-media-dummy"
 version = "0.6.0"
+source = "git+https://github.com/einkdisplay/servo?branch=kindle-fontconfigless#9f19a88ec22ee68b74137c310355154a2f33aa48"
 dependencies = [
  "servo-base",
  "servo-media",
@@ -5418,6 +5461,7 @@ dependencies = [
 [[package]]
 name = "servo-media-ohos"
 version = "0.6.0"
+source = "git+https://github.com/einkdisplay/servo?branch=kindle-fontconfigless#9f19a88ec22ee68b74137c310355154a2f33aa48"
 dependencies = [
  "crossbeam-channel",
  "libc",
@@ -5440,6 +5484,7 @@ dependencies = [
 [[package]]
 name = "servo-media-player"
 version = "0.6.0"
+source = "git+https://github.com/einkdisplay/servo?branch=kindle-fontconfigless#9f19a88ec22ee68b74137c310355154a2f33aa48"
 dependencies = [
  "malloc_size_of_derive",
  "serde",
@@ -5452,6 +5497,7 @@ dependencies = [
 [[package]]
 name = "servo-media-streams"
 version = "0.6.0"
+source = "git+https://github.com/einkdisplay/servo?branch=kindle-fontconfigless#9f19a88ec22ee68b74137c310355154a2f33aa48"
 dependencies = [
  "malloc_size_of_derive",
  "servo-malloc-size-of",
@@ -5461,6 +5507,7 @@ dependencies = [
 [[package]]
 name = "servo-media-thread"
 version = "0.6.0"
+source = "git+https://github.com/einkdisplay/servo?branch=kindle-fontconfigless#9f19a88ec22ee68b74137c310355154a2f33aa48"
 dependencies = [
  "euclid",
  "ipc-channel",
@@ -5479,6 +5526,7 @@ dependencies = [
 [[package]]
 name = "servo-media-traits"
 version = "0.6.0"
+source = "git+https://github.com/einkdisplay/servo?branch=kindle-fontconfigless#9f19a88ec22ee68b74137c310355154a2f33aa48"
 dependencies = [
  "malloc_size_of_derive",
  "servo-malloc-size-of",
@@ -5487,6 +5535,7 @@ dependencies = [
 [[package]]
 name = "servo-media-webrtc"
 version = "0.6.0"
+source = "git+https://github.com/einkdisplay/servo?branch=kindle-fontconfigless#9f19a88ec22ee68b74137c310355154a2f33aa48"
 dependencies = [
  "log",
  "servo-media-streams",
@@ -5496,6 +5545,7 @@ dependencies = [
 [[package]]
 name = "servo-metrics"
 version = "0.6.0"
+source = "git+https://github.com/einkdisplay/servo?branch=kindle-fontconfigless#9f19a88ec22ee68b74137c310355154a2f33aa48"
 dependencies = [
  "malloc_size_of_derive",
  "servo-base",
@@ -5510,6 +5560,7 @@ dependencies = [
 [[package]]
 name = "servo-net"
 version = "0.6.0"
+source = "git+https://github.com/einkdisplay/servo?branch=kindle-fontconfigless#9f19a88ec22ee68b74137c310355154a2f33aa48"
 dependencies = [
  "async-compression",
  "async-recursion",
@@ -5586,6 +5637,7 @@ dependencies = [
 [[package]]
 name = "servo-net-traits"
 version = "0.6.0"
+source = "git+https://github.com/einkdisplay/servo?branch=kindle-fontconfigless#9f19a88ec22ee68b74137c310355154a2f33aa48"
 dependencies = [
  "bytes",
  "content-security-policy",
@@ -5628,6 +5680,7 @@ dependencies = [
 [[package]]
 name = "servo-paint"
 version = "0.6.0"
+source = "git+https://github.com/einkdisplay/servo?branch=kindle-fontconfigless#9f19a88ec22ee68b74137c310355154a2f33aa48"
 dependencies = [
  "bitflags 2.13.1",
  "crossbeam-channel",
@@ -5662,6 +5715,7 @@ dependencies = [
 [[package]]
 name = "servo-paint-api"
 version = "0.6.0"
+source = "git+https://github.com/einkdisplay/servo?branch=kindle-fontconfigless#9f19a88ec22ee68b74137c310355154a2f33aa48"
 dependencies = [
  "bitflags 2.13.1",
  "crossbeam-channel",
@@ -5697,6 +5751,7 @@ dependencies = [
 [[package]]
 name = "servo-pixels"
 version = "0.6.0"
+source = "git+https://github.com/einkdisplay/servo?branch=kindle-fontconfigless#9f19a88ec22ee68b74137c310355154a2f33aa48"
 dependencies = [
  "euclid",
  "image",
@@ -5711,6 +5766,7 @@ dependencies = [
 [[package]]
 name = "servo-profile"
 version = "0.6.0"
+source = "git+https://github.com/einkdisplay/servo?branch=kindle-fontconfigless#9f19a88ec22ee68b74137c310355154a2f33aa48"
 dependencies = [
  "libc",
  "log",
@@ -5728,6 +5784,7 @@ dependencies = [
 [[package]]
 name = "servo-profile-traits"
 version = "0.6.0"
+source = "git+https://github.com/einkdisplay/servo?branch=kindle-fontconfigless#9f19a88ec22ee68b74137c310355154a2f33aa48"
 dependencies = [
  "crossbeam-channel",
  "ipc-channel",
@@ -5743,6 +5800,7 @@ dependencies = [
 [[package]]
 name = "servo-script"
 version = "0.6.0"
+source = "git+https://github.com/einkdisplay/servo?branch=kindle-fontconfigless#9f19a88ec22ee68b74137c310355154a2f33aa48"
 dependencies = [
  "app_units",
  "arrayvec",
@@ -5855,6 +5913,7 @@ dependencies = [
 [[package]]
 name = "servo-script-bindings"
 version = "0.6.0"
+source = "git+https://github.com/einkdisplay/servo?branch=kindle-fontconfigless#9f19a88ec22ee68b74137c310355154a2f33aa48"
 dependencies = [
  "atomic_refcell",
  "bitflags 2.13.1",
@@ -5896,6 +5955,7 @@ dependencies = [
 [[package]]
 name = "servo-script-traits"
 version = "0.6.0"
+source = "git+https://github.com/einkdisplay/servo?branch=kindle-fontconfigless#9f19a88ec22ee68b74137c310355154a2f33aa48"
 dependencies = [
  "accesskit",
  "bitflags 2.13.1",
@@ -5930,6 +5990,7 @@ dependencies = [
 [[package]]
 name = "servo-storage"
 version = "0.6.0"
+source = "git+https://github.com/einkdisplay/servo?branch=kindle-fontconfigless#9f19a88ec22ee68b74137c310355154a2f33aa48"
 dependencies = [
  "libc",
  "log",
@@ -5954,6 +6015,7 @@ dependencies = [
 [[package]]
 name = "servo-storage-traits"
 version = "0.6.0"
+source = "git+https://github.com/einkdisplay/servo?branch=kindle-fontconfigless#9f19a88ec22ee68b74137c310355154a2f33aa48"
 dependencies = [
  "malloc_size_of_derive",
  "serde",
@@ -5967,6 +6029,7 @@ dependencies = [
 [[package]]
 name = "servo-timers"
 version = "0.6.0"
+source = "git+https://github.com/einkdisplay/servo?branch=kindle-fontconfigless#9f19a88ec22ee68b74137c310355154a2f33aa48"
 dependencies = [
  "crossbeam-channel",
  "malloc_size_of_derive",
@@ -5976,6 +6039,7 @@ dependencies = [
 [[package]]
 name = "servo-tracing"
 version = "0.6.0"
+source = "git+https://github.com/einkdisplay/servo?branch=kindle-fontconfigless#9f19a88ec22ee68b74137c310355154a2f33aa48"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -5985,6 +6049,7 @@ dependencies = [
 [[package]]
 name = "servo-url"
 version = "0.6.0"
+source = "git+https://github.com/einkdisplay/servo?branch=kindle-fontconfigless#9f19a88ec22ee68b74137c310355154a2f33aa48"
 dependencies = [
  "encoding_rs",
  "malloc_size_of_derive",
@@ -5998,6 +6063,7 @@ dependencies = [
 [[package]]
 name = "servo-wakelock"
 version = "0.6.0"
+source = "git+https://github.com/einkdisplay/servo?branch=kindle-fontconfigless#9f19a88ec22ee68b74137c310355154a2f33aa48"
 dependencies = [
  "serde",
  "servo-embedder-traits",
@@ -6006,6 +6072,7 @@ dependencies = [
 [[package]]
 name = "servo-webvtt"
 version = "0.6.0"
+source = "git+https://github.com/einkdisplay/servo?branch=kindle-fontconfigless#9f19a88ec22ee68b74137c310355154a2f33aa48"
 dependencies = [
  "html5ever",
  "markup5ever",
@@ -6015,6 +6082,7 @@ dependencies = [
 [[package]]
 name = "servo-webxr-api"
 version = "0.6.0"
+source = "git+https://github.com/einkdisplay/servo?branch=kindle-fontconfigless#9f19a88ec22ee68b74137c310355154a2f33aa48"
 dependencies = [
  "euclid",
  "ipc-channel",
@@ -6030,6 +6098,7 @@ dependencies = [
 [[package]]
 name = "servo-xpath"
 version = "0.6.0"
+source = "git+https://github.com/einkdisplay/servo?branch=kindle-fontconfigless#9f19a88ec22ee68b74137c310355154a2f33aa48"
 dependencies = [
  "log",
  "malloc_size_of_derive",
@@ -6329,7 +6398,7 @@ dependencies = [
  "derive_more",
  "encoding_rs",
  "euclid",
- "icu_segmenter 2.1.2",
+ "icu_segmenter 1.5.0",
  "indexmap",
  "itertools 0.14.0",
  "itoa",
@@ -6456,6 +6525,8 @@ checksum = "13c2bddecc57b384dee18652358fb23172facb8a2c51ccc10d74c157bdea3292"
 [[package]]
 name = "surfman"
 version = "0.13.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6ef7ecad967262d0b8bf1cbe753fe9b13ddf068606d30ceb370b87c73c5964b5"
 dependencies = [
  "bitflags 2.13.1",
  "cfg_aliases",

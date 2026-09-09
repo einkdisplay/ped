@@ -4,8 +4,8 @@
 *.swp
 .idea/
 .vscode/
-x11-egl-*.c
-x11-glx-*.c
 
-# Local Cargo path patches (not published; fork later)
+# Local scratch only (published deps come from git / vendored C sources)
 /vendor/
+
+.cache/
