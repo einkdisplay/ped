@@ -1,0 +1,37 @@
+{
+  "name": "ped-types",
+  "version": "0.1.0",
+  "description": "TypeScript types for pages running inside PED (Potato E-ink Display)",
+  "author": "Enita Nureya <enitanureya@outlook.com>",
+  "license": "MIT",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts"
+    }
+  },
+  "files": [
+    "index.d.ts",
+    "LICENSE",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/einkdisplay/ped.git",
+    "directory": "js-binding"
+  },
+  "homepage": "https://github.com/einkdisplay/ped/tree/main/js-binding",
+  "bugs": {
+    "url": "https://github.com/einkdisplay/ped/issues"
+  },
+  "keywords": [
+    "kindle",
+    "eink",
+    "ped",
+    "potato",
+    "fried-potato",
+    "typescript",
+    "types"
+  ],
+  "packageManager": "pnpm@12.3.4"
+}

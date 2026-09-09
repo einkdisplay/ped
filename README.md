@@ -105,7 +105,7 @@ long-running operation, crash recovery, and actual KUAL installation.
 - Lifecycle design: [SERVO_KINDLE_PLAN.md](../SERVO_KINDLE_PLAN.md)
 - ARMv7 build notes: [SERVO_ARMV7_BUILD_NOTES.md](../SERVO_ARMV7_BUILD_NOTES.md)
 - Kindle lessons: [SERVO_KINDLE_LESSONS.md](../SERVO_KINDLE_LESSONS.md)
-- TypeScript API draft: [`../kindle.d.ts`](../kindle.d.ts)
+- TypeScript types: [`js-binding/`](./js-binding/) (`potatoeinkdisplay-types`)
 
 ## Source layout
 
@@ -120,4 +120,4 @@ freetype-sys https://github.com/einkdisplay/freetype-sys (master)
 FBInk C sources used by `fbink-sys` are vendored under
 `crates/fbink-sys/vendor/fbink/`.
 
-TypeScript API draft: `kindle.d.ts` in this repository root.
+TypeScript types for `navigator.kindle`: [`js-binding/`](./js-binding/) (`potatoeinkdisplay-types`).
