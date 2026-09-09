@@ -2,8 +2,9 @@
 
 Instructions for coding agents working on **PED** (Potato E-ink Display).
 
-Human-oriented product docs live in `README.md`. This file is the operational
-brief for automated changes.
+Human-oriented product docs live in `README.md` (Chinese: `README.zh.md`).
+Build, deploy, control-plane, and hardware-validation notes live in
+`DEVELOPMENT.md`. This file is the operational brief for automated changes.
 
 ## Project overview
 

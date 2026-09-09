@@ -1,33 +1,104 @@
+# PED runtime config (default deploy sample).
+# Paths below that are relative resolve against this file's directory.
+# `ped-cli reload-config` hot-applies display / origin / size limits;
+# socket, page URL/scripts, lifecycle core fields, static_server, and
+# control.queue_capacity need a full restart.
+
+# -----------------------------------------------------------------------------
+# Page loaded into Servo
+# -----------------------------------------------------------------------------
 [page]
+# Initial document. Relative paths become file:// then are usually rehosted
+# by [static_server] as http://127.0.0.1:<port>/.... Also accepts http(s)://
+# or data: URLs. Changing this requires restart.
 url = "dashboard/index.html"
+
+# User scripts injected at document start (relative paths OK). Restart required.
 script = ["dashboard/ped.js"]
+
+# Origins allowed to call privileged navigator.kindle APIs (refresh, battery,
+# network, …). Scheme + host only (optional port); no path/query/fragment.
+# Empty list => default trust for http(s)/file on 127.0.0.1 or localhost.
 trusted_origins = ["http://127.0.0.1"]
+
+# Origins allowed for ped-cli `open`. Empty list => only the initial page origin.
 allowed_origins = ["http://127.0.0.1"]
 
+# -----------------------------------------------------------------------------
+# E-ink commit / FBInk refresh policy
+# -----------------------------------------------------------------------------
 [display]
+# When true, PED periodically screenshots and refreshes dirty regions.
 auto_refresh = true
+
+# Minimum interval between automatic refresh ticks (must be > 0).
 refresh_interval_ms = 2500
+
+# Default waveform for automatic commits: "auto" | "fast" | "quality".
+# Page API refreshNow() can override per call when the origin is trusted.
 waveform = "quality"
+
+# After N partial commits, force a full-screen refresh to clear ghosting.
 periodic_full_refresh = true
+
+# Partial commits between forced full refreshes (must be > 0).
 full_refresh_interval = 20
+
+# Block until FBInk reports the panel update finished (slower, more deterministic).
 wait_for_complete = false
 
+# -----------------------------------------------------------------------------
+# Unix NDJSON control plane (ped-cli)
+# -----------------------------------------------------------------------------
 [control]
+# Socket path (mode 0600). Changing path requires restart.
 socket = "/tmp/ped.sock"
+
+# Max bytes for ped-cli `eval` script payloads (must be > 0).
 max_script_bytes = 65536
+
+# Max bytes for ped-cli `emit` JSON detail (must be > 0).
 max_event_detail_bytes = 32768
+
+# Max bytes for one control request; must be >= script and event detail limits.
 max_request_bytes = 131072
+
+# Bounded queue of pending control commands (must be > 0). Restart required.
 queue_capacity = 32
 
+# -----------------------------------------------------------------------------
+# Kindle GUI takeover (jailbroken device only)
+# -----------------------------------------------------------------------------
 [lifecycle]
+# When true: write marker, stop lab126_gui, heartbeat; cleanup starts the service.
+# Leave false off-device / for non-fb0 testing.
 enabled = false
+
+# Session marker path; external scripts/ped-watchdog.sh can recover from it.
 marker = "/var/run/ped/session.json"
+
+# Upstart/init service name restored on exit (do not raw-kill the Amazon GUI).
 service = "lab126_gui"
+
+# How long to wait for the service stop before continuing startup.
 stop_timeout_ms = 3000
+
+# Heartbeat / stale-marker window used with the watchdog helper (seconds).
 watchdog_timeout_s = 30
 
+# -----------------------------------------------------------------------------
+# Local static HTTP for file:// pages (loopback only)
+# -----------------------------------------------------------------------------
 [static_server]
+# Required for local file pages (file:// without this is rejected).
+# Structural changes here require restart.
 enabled = true
+
+# Must be loopback: 127.x.x.x or "localhost" (non-loopback is rejected).
 bind = "127.0.0.1"
+
+# TCP port; 0 = ephemeral (printed at startup).
 port = 0
+
+# URL path prefix for served assets (usually "/").
 prefix = "/"

@@ -1,123 +1,129 @@
-# PED, Potato E-ink Display
+# PED, Potato E-Ink Display
 
-PED is a non-touch Kindle Paperwhite information display. Servo renders
-HTML/CSS/JavaScript with SWGL, and FBInk commits grayscale frames to `/dev/fb0`.
-External control uses TOML, a restricted Unix socket, and `ped-cli`.
+PED (Potato E-Ink Display) is a tool that makes it easy to turn a Kindle into a
+custom screen.
 
-## Quick start
+## Introduction
 
-```sh
-./target/armv7-unknown-linux-musleabihf/release/ped --config=ped.toml
-./target/armv7-unknown-linux-musleabihf/release/ped-cli status
-./target/armv7-unknown-linux-musleabihf/release/ped-cli refresh
-./target/armv7-unknown-linux-musleabihf/release/ped-cli stop
+PED is a web browser. It opens a single tab, renders pages on the CPU, and
+refreshes the result straight onto the e-ink panel with
+[NiLuJe's FBInk](https://github.com/NiLuJe/FBInk), bypassing Kindle's X11
+display server.
+
+PED is also an experiment. Built with Rust and Servo, it explores how Servo, a still-emerging browser engine, behaves under long-running
+use on embedded devices (namely Kindles).
+
+### Why not just use the Experimental Browser?
+
+Compared with PED, Kindle's built-in Experimental Browser has several problems.
+
+#### A chrome you cannot hide
+
+The stock browser has a permanent top chrome that takes roughly one sixth of the
+screen. That is not catastrophic, but it is ugly for a dedicated information
+display.
+
+PED bypasses Kindle OS UI and paints the page directly to the panel, so it can
+run truly full screen.
+
+#### Ancient
+
+On my PW3 (firmware 5.16.2.1.1), the built-in browser engine is WebKit 531.2.
+That system firmware shipped around 2019, yet community research dates that
+WebKit release to 2009. It does not even support Flexbox. Unless you enjoy
+polyfilling everything, you will not want the stock browser.
+
+Servo is still experimental and early-stage, but it already covers most features
+modern pages need. That should be enough to build a comfortable information
+display with contemporary web tech.
+
+#### Restrictions
+
+The stock browser can detect dynamic page elements and pop up a dialog refusing
+to show the page. PED does not impose that restriction.
+
+#### Coarse screen refresh control
+
+PED exposes a `window.navigator.kindle` JS API
+(*[details](./js-binding)*) so you can control when, how, and which regions of
+the screen refresh.
+
+The stock browser has no equivalent; refresh behavior is entirely out of your
+hands.
+
+## Install
+
+- **Prerequisite**: a jailbroken Kindle.
+
+Coming soon!
+
+## Usage
+
+After install, open PED from the KUAL menu or your library and it should just
+work.
+
+Before you rely on PED day to day, we recommend installing the
+[USBNetwork](https://wiki.mobileread.com/wiki/USBNetwork) package and setting up
+SSH from your computer to the Kindle. Test thoroughly before launching PED as
+your main display path.
+
+## Configuration
+
+PED uses a TOML config file. Edit it on your computer and place it at the
+expected path before starting PED.
+
+See the [comments in the TOML file](./ped.toml).
+
+## Building
+
+You will need:
+
+- A Rust toolchain
+- Podman or Docker
+- [Cross](https://github.com/cross-rs/cross)
+
+See [DEVELOPMENT.md](./DEVELOPMENT.md).
+
+## Authoring pages for PED
+
+### TypeScript types
+
+[![NPM Version](https://img.shields.io/npm/v/potatoeinkdisplay-types)](https://npmjs.com/package/potatoeinkdisplay-types)
+
+You can use PED's Kindle browser API (`window.navigator.kindle`) to read device
+info (network, screen, battery) and control screen refresh. Matching TypeScript
+definitions are published on npm as `potatoeinkdisplay-types`.
+
+Install it as a dev dependency:
+
+```bash
+pnpm add -D potatoeinkdisplay-types
 ```
 
-The default configuration maps `dashboard/index.html` and its assets to an
-ephemeral loopback HTTP server. Relative script paths resolve beside the TOML
-file. The server is loopback-only and rejects traversal.
+Then add this to your entry file so TypeScript picks up the globals:
 
-Supported control methods are `status`, `open`, `eval`, `emit`, `refresh`,
-`reload-config`, and `stop`. `open` is origin-allowlisted. `reload-config` hot-applies display/control/origin settings when possible and
-returns `restart_required` only for structural changes (socket, page, lifecycle, static server).
-
-KUAL and Scriptlet launch assets are under `apps/kual/` and `apps/scriptlet/`. An independent
-lifecycle helper is available as `scripts/ped-watchdog.sh`. They use
-the same binary and control path. Set `lifecycle.enabled = true` only on a
-jailbroken Kindle where `/dev/fb0` and `/sbin/start`/`/sbin/stop` exist. PED
-then records a marker, stops `lab126_gui`, and attempts to restore it during
-cleanup.
-
-## Browser API
-
-`navigator.kindle.screen` supports `setAutoRefresh`, `lastRefresh`, `refreshNow`,
-and `beginRefresh` transactions. `navigator.kindle.device.battery()` /
-`network()` return device telemetry when available. Privileged calls are limited
-to configured `trusted_origins`.
-
-
-## Kernel entropy (Kindle)
-
-AWS-LC (via rustls) blocks when `RNDGETENTCNT` reports `< 256` bits. PED:
-
-1. harvests CPU timing jitter with `rand_jitter`
-2. credits the kernel with `RNDADDENTROPY` (not a bare write to `/dev/random`)
-3. keeps a background top-up thread while PED is running
-
-Look for `ped: seeded kernel entropy ...` near startup. Residual `RNDGETENTCNT` spam should be rare once the maintain thread is alive.
-
-## Hardware validation page
-
-The default dashboard intentionally mutates the DOM every second so a real
-Kindle can prove the live path:
-
-```text
-page.js DOM updates → Servo/SWGL re-render → PED auto screenshot (~2.5s)
-→ grayscale/diff → FBInk → /dev/fb0
+```typescript
+/// <reference types="potatoeinkdisplay-types" />
 ```
 
-What should change on screen without any `navigator.kindle` refresh API:
+### Testing
 
-- large clock and DOM tick counter
-- inverted black/white phase panel
-- moving bar blocks
-- rotating banner text
-- `navigator.kindle` status card (`attrs only` is expected today)
+PED uses the Servo browser engine, which may not support every Web feature you
+use during development.
 
-Copy the release binaries plus `ped.toml` and the whole `dashboard/` directory
-to the device, then run from that directory:
+Before shipping page code, download
+[Servo Shell](https://github.com/servo/servo/releases/tag/v0.5.0) and verify
+how your page renders there.
 
-```sh
-SERVO_DISABLE_SYSTEM_FONTS=1 ./ped --config=ped.toml
-```
+> PED is based on a development snapshot of Servo 0.6.0. The Servo Shell build
+> above (Servo 0.5.0) is usually good enough, but if you want closer 1:1 parity
+> you can build Servo Shell yourself from
+> [that upstream Servo revision](https://github.com/servo/servo/commit/55964f7d6d50872b51d8f94ef03ad10ac0bbcf1e)
+> (commit SHA-1: `55964f7`).
 
-Optional control checks from another shell:
+## License
 
-```sh
-./ped-cli status
-./ped-cli emit --type=update --detail='{"runtime":"manual-emit"}'
-./ped-cli refresh
-./ped-cli stop
-```
+MIT
 
-## Entropy bootstrap
-
-PED credits the kernel entropy pool at startup with CPU-jitter samples
-(`rand_jitter` + `RNDADDENTROPY`) so AWS-LC/rustls does not block on Kindle
-kernels that report low `entropy_avail`. This runs before Servo initializes.
-
-## Build and validation
-
-The authoritative build is the ARMv7 MUSL Podman build described in
-[`../SERVO_ARMV7_BUILD_NOTES.md`](../SERVO_ARMV7_BUILD_NOTES.md). Host Cargo
-checks are not authoritative because the vendored Kindle-oriented
-`freetype-sys` build requires the ARM environment.
-
-The verified software path is:
-
-```text
-Servo HTML/CSS/JS → SWGL CPU frame → grayscale/diff → FBInk → /dev/fb0
-```
-
-Hardware validation remains required for dynamic updates, sleep/wake,
-long-running operation, crash recovery, and actual KUAL installation.
-
-- Lifecycle design: [SERVO_KINDLE_PLAN.md](../SERVO_KINDLE_PLAN.md)
-- ARMv7 build notes: [SERVO_ARMV7_BUILD_NOTES.md](../SERVO_ARMV7_BUILD_NOTES.md)
-- Kindle lessons: [SERVO_KINDLE_LESSONS.md](../SERVO_KINDLE_LESSONS.md)
-- TypeScript types: [`js-binding/`](./js-binding/) (`potatoeinkdisplay-types`)
-
-## Source layout
-
-PED expects sibling checkouts (git dependencies on the einkdisplay forks:
-
-```text
-servo        https://github.com/einkdisplay/servo        (kindle-fontconfigless)
-mozjs_sys    https://github.com/einkdisplay/mozjs        (kindle-armv7-musl)
-freetype-sys https://github.com/einkdisplay/freetype-sys (master)
-```
-
-FBInk C sources used by `fbink-sys` are vendored under
-`crates/fbink-sys/vendor/fbink/`.
-
-TypeScript types for `navigator.kindle`: [`js-binding/`](./js-binding/) (`potatoeinkdisplay-types`).
+> This repository vendors [FBInk code under `crates/fbink-sys/`](./crates/fbink-sys/),
+> which remains licensed under GPLv3.

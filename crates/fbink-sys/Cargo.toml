@@ -5,10 +5,7 @@ edition = "2024"
 publish = false
 links = "fbink"
 description = "Minimal Kindle FBInk FFI bindings for PED"
-license = "MIT OR Apache-2.0"
-
-# Upstream FBInk is GPLv3+/BSD-ish per its LICENSE; vendored sources retain
-# upstream terms under vendor/fbink/LICENSE.
+license = "GPL-3.0-or-later"
 
 [build-dependencies]
 bindgen = "0.72"
