@@ -99,13 +99,24 @@ See [DEVELOPMENT.md](./DEVELOPMENT.md).
 
 ## Authoring pages for PED
 
-### TypeScript types
+### Reference dashboard
+
+You don't need to write any code if you just want to evaluate PED. [einkdisplay/dashboard](https://github.com/einkdisplay/dashboard)
+is an example PED dashboard. You can use that if you don't need your own dashboard page.
+
+### `navigator.kindle` API
+
+PED provides a `navigator.kindle` API so you can control how your page is refreshed, as well as query the device's own metrics.
+
+#### Documentation
+
+See JSDoc comments on the [TypeScript definition file](./js-binding/index.d.ts).
+
+#### TypeScript types
 
 [![NPM Version](https://img.shields.io/npm/v/potatoeinkdisplay-types)](https://npmjs.com/package/potatoeinkdisplay-types)
 
-You can use PED's Kindle browser API (`window.navigator.kindle`) to read device
-info (network, screen, battery) and control screen refresh. Matching TypeScript
-definitions are published on npm as `potatoeinkdisplay-types`.
+TypeScript definitions for the API are published on npm as `potatoeinkdisplay-types`.
 
 Install it as a dev dependency:
 
@@ -118,6 +129,29 @@ Then add this to your entry file so TypeScript picks up the globals:
 ```typescript
 /// <reference types="potatoeinkdisplay-types" />
 ```
+
+#### Polyfill
+
+[![NPM Version](https://img.shields.io/npm/v/potatoeinkdisplay-polyfill)](https://npmjs.com/package/potatoeinkdisplay-polyfill)
+
+You may need to polyfill the `navigator.kindle` API to debug your page on a normal browser.
+
+We officially provide a polyfill for this. Simply install it:
+
+```bash
+pnpm add potatoeinkdisplay-polyfill
+```
+
+Then import it in the JS entrypoint of your page
+
+```typescript
+import "potatoeinkdisplay-polyfill";
+```
+
+You're all set! 
+
+It's OK to have the polyfill imported even on the actual PED. It will skip polyfilling if there
+exists an existing `navigator.kindle` API.
 
 ### Testing
 
