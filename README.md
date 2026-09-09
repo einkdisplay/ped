@@ -1,5 +1,7 @@
 # PED, Potato E-Ink Display
 
+<a href="https://ferris.love/einkdisplay/ped"><img src="https://ferris.love/badge/einkdisplay/ped?variant=mini" alt="Badge showing this repository's Rust code analysis"></a>
+
 PED (Potato E-Ink Display) is a tool that makes it easy to turn a Kindle into a
 custom screen.
 
