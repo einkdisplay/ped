@@ -33,6 +33,9 @@ pub struct DisplayConfig {
     pub auto_refresh: bool,
     pub refresh_interval_ms: u64,
     pub waveform: String,
+    /// Logical page orientation: portrait | landscape | portrait-inverted | landscape-inverted.
+    /// Changing this requires a full restart (Servo viewport size).
+    pub orientation: String,
     pub periodic_full_refresh: bool,
     pub full_refresh_interval: u32,
     pub wait_for_complete: bool,
@@ -97,6 +100,7 @@ impl Default for DisplayConfig {
             auto_refresh: true,
             refresh_interval_ms: 2500,
             waveform: "quality".to_owned(),
+            orientation: "portrait".to_owned(),
             periodic_full_refresh: true,
             full_refresh_interval: 20,
             wait_for_complete: false,
@@ -193,6 +197,7 @@ impl Config {
         if self.display.refresh_interval_ms == 0 {
             return Err("display.refresh_interval_ms must be greater than zero".to_owned());
         }
+        crate::display::Orientation::parse(&self.display.orientation)?;
         if self.control.max_script_bytes == 0 {
             return Err("control.max_script_bytes must be greater than zero".to_owned());
         }
@@ -248,6 +253,10 @@ impl Config {
         Url::parse(&self.page.url).map_err(|error| format!("invalid page.url: {error}"))
     }
 
+    pub fn orientation(&self) -> Result<crate::display::Orientation, String> {
+        crate::display::Orientation::parse(&self.display.orientation)
+    }
+
     pub fn is_url_allowed(&self, candidate: &Url, initial: &Url) -> bool {
         if self.page.allowed_origins.is_empty() {
             return candidate.origin() == initial.origin();
@@ -281,10 +290,12 @@ impl Config {
             || self.lifecycle.marker != next.lifecycle.marker
             || self.lifecycle.service != next.lifecycle.service
             || self.control.queue_capacity != next.control.queue_capacity
+            || self.display.orientation != next.display.orientation
         {
             report.restart_required = true;
             report.messages.push(
-                "socket/static-server/page/lifecycle/queue changes require restart".to_owned(),
+                "socket/static-server/page/lifecycle/queue/orientation changes require restart"
+                    .to_owned(),
             );
             return Ok(report);
         }
@@ -345,6 +356,15 @@ mod tests {
         let mut config = Config::default();
         config.static_server.bind = "0.0.0.0".to_owned();
         assert!(config.validate().is_err());
+    }
+
+    #[test]
+    fn invalid_orientation_is_rejected() {
+        let mut config = Config::default();
+        config.display.orientation = "sideways".to_owned();
+        assert!(config.validate().is_err());
+        config.display.orientation = "landscape".to_owned();
+        assert!(config.validate().is_ok());
     }
 
     #[test]

@@ -76,6 +76,17 @@ expected path before starting PED.
 
 See the [comments in the TOML file](./ped.toml).
 
+To run the page in landscape, set:
+
+```toml
+[display]
+orientation = "landscape"
+```
+
+Supported values: `portrait` (default), `landscape`, `portrait-inverted`,
+`landscape-inverted` (also `0` / `90` / `180` / `270`). Changing orientation
+requires restarting PED.
+
 ## Building
 
 You will need:

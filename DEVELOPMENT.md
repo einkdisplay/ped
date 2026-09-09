@@ -24,7 +24,24 @@ Supported control methods are `status`, `open`, `eval`, `emit`, `refresh`,
 `reload-config`, and `stop`. `open` is origin-allowlisted. `reload-config`
 hot-applies display/control/origin settings when possible and returns
 `restart_required` only for structural changes (socket, page, lifecycle, static
-server). Field-level comments live in [`ped.toml`](./ped.toml).
+server, and `display.orientation`). Field-level comments live in
+[`ped.toml`](./ped.toml).
+
+### Display orientation
+
+`[display] orientation` selects the logical page viewport relative to the native
+portrait panel (1072×1448 on PW3-class devices):
+
+| value | logical viewport | notes |
+|---|---|---|
+| `portrait` (default) | 1072×1448 | native panel |
+| `landscape` | 1448×1072 | CW 90° into FB |
+| `portrait-inverted` | 1072×1448 | 180° |
+| `landscape-inverted` | 1448×1072 | CCW 90° / CW 270° |
+
+Servo renders at the logical size; PED rotates grayscale frames and dirty
+regions into the physical framebuffer on commit. Aliases `0` / `90` / `180` /
+`270` are accepted. Changing orientation requires restarting `ped`.
 
 KUAL and Scriptlet launch assets are under `apps/kual/` and `apps/scriptlet/`.
 An independent lifecycle helper is available as `scripts/ped-watchdog.sh`. They

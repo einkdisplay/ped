@@ -1,8 +1,8 @@
 # PED runtime config (default deploy sample).
 # Paths below that are relative resolve against this file's directory.
 # `ped-cli reload-config` hot-applies display / origin / size limits;
-# socket, page URL/scripts, lifecycle core fields, static_server, and
-# control.queue_capacity need a full restart.
+# socket, page URL/scripts, lifecycle core fields, static_server,
+# control.queue_capacity, and display.orientation need a full restart.
 
 # -----------------------------------------------------------------------------
 # Page loaded into Servo
@@ -37,6 +37,12 @@ refresh_interval_ms = 2500
 # Default waveform for automatic commits: "auto" | "fast" | "quality".
 # Page API refreshNow() can override per call when the origin is trusted.
 waveform = "quality"
+
+# Logical page orientation relative to the native portrait panel (1072x1448).
+# "portrait" | "landscape" | "portrait-inverted" | "landscape-inverted"
+# Also accepts 0/90/180/270. Landscape renders at 1448x1072 and rotates into
+# the physical framebuffer on commit. Changing this requires a full restart.
+orientation = "portrait"
 
 # After N partial commits, force a full-screen refresh to clear ghosting.
 periodic_full_refresh = true

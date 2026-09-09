@@ -52,6 +52,16 @@ PED 使用 TOML 格式的配置文件。在打开 PED 之前，请务必先在�
 
 见 [TOML 文件中的注释](./ped.toml)。
 
+横屏显示可在配置里设置朝向：
+
+```toml
+[display]
+orientation = "landscape"
+```
+
+可选值：`portrait`（默认竖屏）、`landscape`（横屏）、`portrait-inverted`、
+`landscape-inverted`（也可用 `0` / `90` / `180` / `270`）。修改朝向后需要重启 PED。
+
 ## 构建
 
 在开始之前，你需要：

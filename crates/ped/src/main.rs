@@ -25,13 +25,10 @@ use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 use config::Config;
 use control::{Command, ControlServer};
-use display::{GrayFrame, Rect, Scheduler, Waveform};
+use display::{rotate_to_native, GrayFrame, Orientation, Rect, Scheduler, Waveform};
 use kindle_lifecycle::{LifecycleConfig as RuntimeLifecycleConfig, LifecycleGuard};
 use runtime::{RefreshStats, State};
 use static_server::StaticFileServer;
-
-const WIDTH: u32 = 1072;
-const HEIGHT: u32 = 1448;
 
 #[derive(Default)]
 struct Delegate {
@@ -142,6 +139,19 @@ fn main() {
         eprintln!("ped: {error}");
         std::process::exit(2);
     });
+    let orientation = config.orientation().unwrap_or_else(|error| {
+        eprintln!("ped: {error}");
+        std::process::exit(2);
+    });
+    let (logical_width, logical_height) = orientation.logical_size();
+    println!(
+        "ped: orientation {} (logical {}x{}, native panel {}x{})",
+        orientation.as_str(),
+        logical_width,
+        logical_height,
+        display::NATIVE_WIDTH,
+        display::NATIVE_HEIGHT
+    );
     let lifecycle_config = RuntimeLifecycleConfig {
         enabled: config.lifecycle.enabled,
         marker: config.lifecycle.marker.clone(),
@@ -175,7 +185,7 @@ fn main() {
     println!("ped: initializing libservo");
     let servo = ServoBuilder::default().build();
     let context = Rc::new(
-        CpuRenderingContext::new(PhysicalSize::new(WIDTH, HEIGHT)).expect("CPU rendering context"),
+        CpuRenderingContext::new(PhysicalSize::new(logical_width, logical_height)).expect("CPU rendering context"),
     );
     context
         .make_current()
@@ -262,6 +272,8 @@ fn main() {
             &mut scheduler,
             &mut pending_api_refresh,
             &mut waveform,
+            logical_width,
+            logical_height,
         );
         servo.spin_event_loop();
         thread::sleep(Duration::from_millis(10));
@@ -276,10 +288,11 @@ fn main() {
         image.height()
     );
 
-    let frame = grayscale_frame(&image);
+    let frame = grayscale_frame(&image, logical_width, logical_height);
     if let Err(error) = commit_frame(
         &frame,
-        Rect::full(WIDTH, HEIGHT),
+        Rect::full(logical_width, logical_height),
+        orientation,
         waveform,
         false,
         runtime_flags.wait_for_complete,
@@ -292,7 +305,7 @@ fn main() {
     let initial_sequence = scheduler.commit(initial_refresh_time);
     refresh_stats.record_success(
         initial_sequence,
-        (0, 0, WIDTH, HEIGHT),
+        (0, 0, logical_width, logical_height),
         initial_refresh_time,
     );
     let last_frame = Rc::new(RefCell::new(Some(frame)));
@@ -324,6 +337,8 @@ fn main() {
             &mut scheduler,
             &mut pending_api_refresh,
             &mut waveform,
+            logical_width,
+            logical_height,
         );
         servo.spin_event_loop();
         if let Some(frame_view) = delegate.frame_ready.borrow_mut().take() {
@@ -343,13 +358,13 @@ fn main() {
             });
         }
         if let Some(image) = pending_screenshot.borrow_mut().take() {
-            let frame = grayscale_frame(&image);
+            let frame = grayscale_frame(&image, logical_width, logical_height);
             if let Some(api) = pending_api_refresh.as_ref() {
                 let region = if api.full {
-                    Rect::full(WIDTH, HEIGHT)
+                    Rect::full(logical_width, logical_height)
                 } else {
                     api.region
-                        .unwrap_or_else(|| Rect::full(WIDTH, HEIGHT))
+                        .unwrap_or_else(|| Rect::full(logical_width, logical_height))
                 };
                 *pending_region.borrow_mut() = Some(region);
                 *pending_frame.borrow_mut() = Some(frame);
@@ -361,7 +376,7 @@ fn main() {
                     *pending_frame.borrow_mut() = Some(frame);
                     scheduler.request(false);
                 } else if scheduler.full_requested() {
-                    *pending_region.borrow_mut() = Some(Rect::full(WIDTH, HEIGHT));
+                    *pending_region.borrow_mut() = Some(Rect::full(logical_width, logical_height));
                     *pending_frame.borrow_mut() = Some(frame);
                 }
             }
@@ -372,24 +387,25 @@ fn main() {
                 let mut region = pending_region
                     .borrow_mut()
                     .take()
-                    .unwrap_or(Rect::full(WIDTH, HEIGHT));
+                    .unwrap_or(Rect::full(logical_width, logical_height));
                 let mut commit_waveform = waveform;
                 let mut flashing = false;
                 if let Some(api) = api.as_ref() {
                     commit_waveform = api.waveform;
                     flashing = api.flashing;
                     if api.full || api.flashing {
-                        region = Rect::full(WIDTH, HEIGHT);
+                        region = Rect::full(logical_width, logical_height);
                     } else if let Some(api_region) = api.region {
                         region = api_region;
                     }
                 } else if scheduler.take_full_request() {
-                    region = Rect::full(WIDTH, HEIGHT);
+                    region = Rect::full(logical_width, logical_height);
                 }
                 runtime_state = State::Refreshing;
                 let commit_result = commit_frame(
                     &frame,
                     region,
+                    orientation,
                     commit_waveform,
                     flashing,
                     runtime_flags.wait_for_complete,
@@ -479,6 +495,8 @@ fn drain_kindle_commands(
     scheduler: &mut Scheduler,
     pending_api_refresh: &mut Option<PendingApiRefresh>,
     default_waveform: &mut Waveform,
+    logical_width: u32,
+    logical_height: u32,
 ) {
     while let Some(command) = delegate.kindle_commands.borrow_mut().pop_front() {
         match command {
@@ -510,7 +528,14 @@ fn drain_kindle_commands(
                     .regions
                     .iter()
                     .filter_map(|rect| {
-                        Rect::from_css(rect.x, rect.y, rect.width, rect.height, WIDTH, HEIGHT)
+                        Rect::from_css(
+                            rect.x,
+                            rect.y,
+                            rect.width,
+                            rect.height,
+                            logical_width,
+                            logical_height,
+                        )
                     })
                     .reduce(Rect::union);
                 let waveform = match request.waveform {
@@ -649,6 +674,7 @@ fn handle_command(
                         Waveform::Fast => "fast",
                         Waveform::Quality => "quality",
                     },
+                    "orientation": config.display.orientation,
                     "refresh": {
                         "sequence": refresh_stats.sequence,
                         "successful": refresh_stats.successful,
@@ -805,8 +831,11 @@ fn send_error(command: Command, code: &'static str, message: impl Into<String>) 
     let _ = command.reply.send(control::error(id, code, message));
 }
 
-fn grayscale_frame(image: &RgbaImage) -> GrayFrame {
-    assert_eq!((image.width(), image.height()), (WIDTH, HEIGHT));
+fn grayscale_frame(image: &RgbaImage, logical_width: u32, logical_height: u32) -> GrayFrame {
+    assert_eq!(
+        (image.width(), image.height()),
+        (logical_width, logical_height)
+    );
     let pixels = image
         .pixels()
         .map(|pixel| {
@@ -817,17 +846,21 @@ fn grayscale_frame(image: &RgbaImage) -> GrayFrame {
             ((77 * red + 150 * green + 29 * blue) / 256) as u8
         })
         .collect();
-    GrayFrame::new(WIDTH, HEIGHT, pixels).expect("valid grayscale frame")
+    GrayFrame::new(logical_width, logical_height, pixels).expect("valid grayscale frame")
 }
 
 fn commit_frame(
     frame: &GrayFrame,
     region: Rect,
+    orientation: Orientation,
     waveform: Waveform,
     flashing: bool,
     wait_for_complete: bool,
 ) -> Result<(), String> {
-    let pixels = &frame.pixels;
+    // Rotate logical page pixels into native panel coordinates when needed.
+    let native_frame = rotate_to_native(frame, orientation)?;
+    let native_region = orientation.transform_rect(region);
+    let pixels = &native_frame.pixels;
 
     let mut config: fbink_sys::FBInkConfig = unsafe { zeroed() };
     config.is_quiet = true;
@@ -850,8 +883,17 @@ fn commit_frame(
         return Err(format!("fbink_init failed: {init}"));
     }
     println!(
-        "ped: refreshing region {}x{}+{}+{} waveform={:?} flashing={flashing}",
-        region.width, region.height, region.left, region.top, waveform
+        "ped: refreshing region {}x{}+{}+{} (logical {}x{}+{}+{}) orientation={} waveform={:?} flashing={flashing}",
+        native_region.width,
+        native_region.height,
+        native_region.left,
+        native_region.top,
+        region.width,
+        region.height,
+        region.left,
+        region.top,
+        orientation.as_str(),
+        waveform
     );
     // For flashing commits, allow FBInk to refresh with the configured flash flag.
     if flashing {
@@ -861,8 +903,8 @@ fn commit_frame(
         fbink_sys::fbink_print_raw_data(
             fbfd,
             pixels.as_ptr(),
-            frame.width as i32,
-            frame.height as i32,
+            native_frame.width as i32,
+            native_frame.height as i32,
             pixels.len(),
             0,
             0,
@@ -875,10 +917,10 @@ fn commit_frame(
     }
     if !flashing {
         let rect = fbink_sys::FBInkRect {
-            left: region.left as u16,
-            top: region.top as u16,
-            width: region.width as u16,
-            height: region.height as u16,
+            left: native_region.left as u16,
+            top: native_region.top as u16,
+            width: native_region.width as u16,
+            height: native_region.height as u16,
         };
         let refreshed = unsafe { fbink_sys::fbink_refresh_rect(fbfd, &rect, &config) };
         if refreshed != 0 {

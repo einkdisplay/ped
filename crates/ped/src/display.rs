@@ -1,5 +1,9 @@
 use std::time::{Duration, Instant};
 
+/// Native Kindle Paperwhite 3-class panel size (portrait).
+pub const NATIVE_WIDTH: u32 = 1072;
+pub const NATIVE_HEIGHT: u32 = 1448;
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct Rect {
     pub left: u32,
@@ -52,6 +56,147 @@ impl Rect {
     }
 }
 
+/// Logical page orientation relative to the native portrait panel.
+///
+/// Landscape modes render the page at swapped dimensions and rotate into the
+/// physical framebuffer on commit.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum Orientation {
+    /// Native panel orientation (1072×1448).
+    Portrait,
+    /// Clockwise 90° from portrait (logical 1448×1072).
+    Landscape,
+    /// 180° from portrait.
+    PortraitInverted,
+    /// Counter-clockwise 90° from portrait / CW 270° (logical 1448×1072).
+    LandscapeInverted,
+}
+
+impl Orientation {
+    pub fn parse(value: &str) -> Result<Self, String> {
+        match value.trim().to_ascii_lowercase().as_str() {
+            "portrait" | "0" => Ok(Self::Portrait),
+            "landscape" | "90" | "landscape-cw" => Ok(Self::Landscape),
+            "portrait-inverted" | "inverted" | "180" | "portrait-flipped" => {
+                Ok(Self::PortraitInverted)
+            }
+            "landscape-inverted" | "270" | "landscape-ccw" | "landscape-flipped" => {
+                Ok(Self::LandscapeInverted)
+            }
+            _ => Err(format!(
+                "unsupported display.orientation: {value} (expected portrait, landscape, portrait-inverted, or landscape-inverted)"
+            )),
+        }
+    }
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Portrait => "portrait",
+            Self::Landscape => "landscape",
+            Self::PortraitInverted => "portrait-inverted",
+            Self::LandscapeInverted => "landscape-inverted",
+        }
+    }
+
+    /// Servo / page viewport size for this orientation.
+    pub fn logical_size(self) -> (u32, u32) {
+        match self {
+            Self::Portrait | Self::PortraitInverted => (NATIVE_WIDTH, NATIVE_HEIGHT),
+            Self::Landscape | Self::LandscapeInverted => (NATIVE_HEIGHT, NATIVE_WIDTH),
+        }
+    }
+
+    /// Map a dirty region from logical page coordinates into native FB space.
+    pub fn transform_rect(self, region: Rect) -> Rect {
+        let (lw, lh) = self.logical_size();
+        match self {
+            Self::Portrait => region,
+            Self::Landscape => {
+                // (x, y) -> (lh - 1 - y, x)
+                Rect {
+                    left: lh.saturating_sub(region.top + region.height),
+                    top: region.left,
+                    width: region.height,
+                    height: region.width,
+                }
+            }
+            Self::PortraitInverted => Rect {
+                left: lw.saturating_sub(region.left + region.width),
+                top: lh.saturating_sub(region.top + region.height),
+                width: region.width,
+                height: region.height,
+            },
+            Self::LandscapeInverted => {
+                // (x, y) -> (y, lw - 1 - x)
+                Rect {
+                    left: region.top,
+                    top: lw.saturating_sub(region.left + region.width),
+                    width: region.height,
+                    height: region.width,
+                }
+            }
+        }
+    }
+}
+
+/// Rotate a logical grayscale frame into native panel coordinates.
+pub fn rotate_to_native(frame: &GrayFrame, orientation: Orientation) -> Result<GrayFrame, String> {
+    let (lw, lh) = orientation.logical_size();
+    if frame.width != lw || frame.height != lh {
+        return Err(format!(
+            "frame is {}x{}, expected logical {}x{} for {}",
+            frame.width,
+            frame.height,
+            lw,
+            lh,
+            orientation.as_str()
+        ));
+    }
+    match orientation {
+        Orientation::Portrait => Ok(GrayFrame {
+            width: frame.width,
+            height: frame.height,
+            pixels: frame.pixels.clone(),
+        }),
+        Orientation::Landscape => {
+            let mut pixels = vec![0_u8; (NATIVE_WIDTH * NATIVE_HEIGHT) as usize];
+            for y in 0..lh {
+                for x in 0..lw {
+                    let src = (y * lw + x) as usize;
+                    let dx = lh - 1 - y;
+                    let dy = x;
+                    pixels[(dy * NATIVE_WIDTH + dx) as usize] = frame.pixels[src];
+                }
+            }
+            GrayFrame::new(NATIVE_WIDTH, NATIVE_HEIGHT, pixels)
+        }
+        Orientation::PortraitInverted => {
+            let mut pixels = vec![0_u8; (lw * lh) as usize];
+            for y in 0..lh {
+                for x in 0..lw {
+                    let src = (y * lw + x) as usize;
+                    let dx = lw - 1 - x;
+                    let dy = lh - 1 - y;
+                    pixels[(dy * lw + dx) as usize] = frame.pixels[src];
+                }
+            }
+            GrayFrame::new(lw, lh, pixels)
+        }
+        Orientation::LandscapeInverted => {
+            let mut pixels = vec![0_u8; (NATIVE_WIDTH * NATIVE_HEIGHT) as usize];
+            for y in 0..lh {
+                for x in 0..lw {
+                    let src = (y * lw + x) as usize;
+                    let dx = y;
+                    let dy = lw - 1 - x;
+                    pixels[(dy * NATIVE_WIDTH + dx) as usize] = frame.pixels[src];
+                }
+            }
+            GrayFrame::new(NATIVE_WIDTH, NATIVE_HEIGHT, pixels)
+        }
+    }
+}
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct GrayFrame {
     pub width: u32,
@@ -85,8 +230,8 @@ impl GrayFrame {
 
         let mut min_x = self.width;
         let mut min_y = self.height;
-        let mut max_x = 0;
-        let mut max_y = 0;
+        let mut max_x = 0_u32;
+        let mut max_y = 0_u32;
         let mut changed = false;
         for (index, (&current, &old)) in self.pixels.iter().zip(previous.pixels.iter()).enumerate()
         {
@@ -102,7 +247,10 @@ impl GrayFrame {
             max_x = max_x.max(x);
             max_y = max_y.max(y);
         }
-        changed.then_some(Rect {
+        if !changed {
+            return None;
+        }
+        Some(Rect {
             left: min_x,
             top: min_y,
             width: max_x - min_x + 1,
@@ -235,15 +383,97 @@ mod tests {
     fn scheduler_coalesces_until_due() {
         let mut scheduler = Scheduler::new(true, 1000);
         let start = Instant::now();
+        // First pending refresh is due immediately (no prior commit).
+        scheduler.request(false);
+        assert!(scheduler.due(start));
+        assert_eq!(scheduler.commit(start), 1);
+        // Subsequent requests respect the interval.
         scheduler.request(false);
         assert!(!scheduler.due(start));
         assert!(scheduler.due(start + Duration::from_secs(1)));
-        assert_eq!(scheduler.commit(start + Duration::from_secs(1)), 1);
+        assert_eq!(scheduler.commit(start + Duration::from_secs(1)), 2);
         assert!(!scheduler.due(start + Duration::from_secs(1)));
     }
 
     #[test]
     fn waveform_rejects_unknown_values() {
         assert!(Waveform::parse("bad").is_err());
+    }
+
+    #[test]
+    fn orientation_aliases_parse() {
+        assert_eq!(Orientation::parse("portrait").unwrap(), Orientation::Portrait);
+        assert_eq!(Orientation::parse("90").unwrap(), Orientation::Landscape);
+        assert_eq!(
+            Orientation::parse("landscape-ccw").unwrap(),
+            Orientation::LandscapeInverted
+        );
+        assert!(Orientation::parse("sideways").is_err());
+    }
+
+    #[test]
+    fn landscape_logical_size_swaps_native() {
+        assert_eq!(
+            Orientation::Portrait.logical_size(),
+            (NATIVE_WIDTH, NATIVE_HEIGHT)
+        );
+        assert_eq!(
+            Orientation::Landscape.logical_size(),
+            (NATIVE_HEIGHT, NATIVE_WIDTH)
+        );
+    }
+
+    #[test]
+    fn rotate_landscape_maps_corners() {
+        let region = Rect {
+            left: 10,
+            top: 20,
+            width: 30,
+            height: 40,
+        };
+        assert_eq!(
+            Orientation::Landscape.transform_rect(region),
+            Rect {
+                left: NATIVE_WIDTH - (20 + 40),
+                top: 10,
+                width: 40,
+                height: 30,
+            }
+        );
+        assert_eq!(
+            Orientation::LandscapeInverted.transform_rect(region),
+            Rect {
+                left: 20,
+                top: NATIVE_HEIGHT - (10 + 30),
+                width: 40,
+                height: 30,
+            }
+        );
+    }
+
+    #[test]
+    fn rotate_portrait_identity_preserves_pixels() {
+        let frame = GrayFrame::new(
+            NATIVE_WIDTH,
+            NATIVE_HEIGHT,
+            vec![7; (NATIVE_WIDTH * NATIVE_HEIGHT) as usize],
+        )
+        .unwrap();
+        let rotated = rotate_to_native(&frame, Orientation::Portrait).unwrap();
+        assert_eq!(rotated, frame);
+    }
+
+    #[test]
+    fn rotate_landscape_moves_top_left_pixel() {
+        // Tiny stand-in: build a full-size frame with one marked pixel at (0,0).
+        let mut pixels = vec![0_u8; (NATIVE_HEIGHT * NATIVE_WIDTH) as usize];
+        pixels[0] = 255; // logical (0,0) in landscape 1448x1072
+        let frame = GrayFrame::new(NATIVE_HEIGHT, NATIVE_WIDTH, pixels).unwrap();
+        let rotated = rotate_to_native(&frame, Orientation::Landscape).unwrap();
+        // CW: (0,0) -> (lh-1, 0) = (NATIVE_WIDTH-1, 0)
+        let idx = (0 * NATIVE_WIDTH + (NATIVE_WIDTH - 1)) as usize;
+        assert_eq!(rotated.pixels[idx], 255);
+        assert_eq!(rotated.width, NATIVE_WIDTH);
+        assert_eq!(rotated.height, NATIVE_HEIGHT);
     }
 }

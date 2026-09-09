@@ -15,10 +15,11 @@ body {
 }
 
 main {
-  width: 1072px;
-  min-height: 1448px;
+  width: 100%;
+  min-height: 100vh;
   margin: 0 auto;
   padding: 48px 56px 64px;
+  box-sizing: border-box;
 }
 
 header {
