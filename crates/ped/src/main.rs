@@ -1,8 +1,8 @@
 mod config;
 mod control;
 mod device;
-mod entropy;
 mod display;
+mod entropy;
 mod kindle_lifecycle;
 mod runtime;
 mod static_server;
@@ -18,14 +18,14 @@ use std::cell::{Cell, RefCell};
 use std::collections::VecDeque;
 use std::mem::zeroed;
 use std::rc::Rc;
-use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::thread;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 use config::Config;
 use control::{Command, ControlServer};
-use display::{rotate_to_native, GrayFrame, Orientation, Rect, Scheduler, Waveform};
+use display::{GrayFrame, Orientation, Rect, Scheduler, Waveform, rotate_to_native};
 use kindle_lifecycle::{LifecycleConfig as RuntimeLifecycleConfig, LifecycleGuard};
 use runtime::{RefreshStats, State};
 use static_server::StaticFileServer;
@@ -96,21 +96,13 @@ impl WebViewDelegate for Delegate {
             .push_back(KindleCommand::Refresh { request, callback });
     }
 
-    fn kindle_query_battery(
-        &self,
-        _webview: WebView,
-        callback: GenericCallback<KindleApiResult>,
-    ) {
+    fn kindle_query_battery(&self, _webview: WebView, callback: GenericCallback<KindleApiResult>) {
         self.kindle_commands
             .borrow_mut()
             .push_back(KindleCommand::Battery { callback });
     }
 
-    fn kindle_query_network(
-        &self,
-        _webview: WebView,
-        callback: GenericCallback<KindleApiResult>,
-    ) {
+    fn kindle_query_network(&self, _webview: WebView, callback: GenericCallback<KindleApiResult>) {
         self.kindle_commands
             .borrow_mut()
             .push_back(KindleCommand::Network { callback });
@@ -185,7 +177,8 @@ fn main() {
     println!("ped: initializing libservo");
     let servo = ServoBuilder::default().build();
     let context = Rc::new(
-        CpuRenderingContext::new(PhysicalSize::new(logical_width, logical_height)).expect("CPU rendering context"),
+        CpuRenderingContext::new(PhysicalSize::new(logical_width, logical_height))
+            .expect("CPU rendering context"),
     );
     context
         .make_current()
@@ -434,7 +427,9 @@ fn main() {
                 } else {
                     refresh_stats.record_failure();
                     if let Some(api) = api {
-                        let message = commit_result.err().unwrap_or_else(|| "commit failed".into());
+                        let message = commit_result
+                            .err()
+                            .unwrap_or_else(|| "commit failed".into());
                         let _ = api.callback.send(KindleApiResult::Error {
                             code: "commit_failed".into(),
                             message,

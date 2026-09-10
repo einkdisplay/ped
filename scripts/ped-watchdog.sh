@@ -3,7 +3,7 @@
 # Intended for a Kindle Upstart/cron job. Acts only when a marker exists.
 
 MARKER="${PED_MARKER:-/var/run/ped/session.json}"
-SERVICE="${PED_SERVICE:-lab126_gui}"
+SERVICE="${PED_SERVICE:-x}"
 
 if [ ! -f "$MARKER" ]; then
   exit 0
@@ -32,6 +32,11 @@ if [ -n "$pid" ] && [ -d "/proc/$pid" ]; then
   sleep 1
   kill -9 "$pid" 2>/dev/null || true
 fi
+# Kindle UI restore is two-step: `x` then `lab126_gui`.
+# `start x` alone never re-emits boot-only n_ready, so framework stays down.
+GUI_SERVICE="${PED_GUI_SERVICE:-lab126_gui}"
 /sbin/start "$SERVICE" >/dev/null 2>&1 || true
+/sbin/start "$GUI_SERVICE" >/dev/null 2>&1 || true
+lipc-set-prop com.lab126.appmgrd start app://com.lab126.booklet.home >/dev/null 2>&1 || true
 rm -f "$MARKER"
 exit 0

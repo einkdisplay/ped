@@ -67,8 +67,9 @@ Related **separate** git repos (not path members of this workspace):
    check is not authoritative for Kindle linkage (freetype/sysroot/fbink).
 2. **Display path is SWGL + FBInk.** Prefer `CpuRenderingContext` / memory frames.
    Do not make PED depend on Surfman opening X11/Wayland on device.
-3. **UI takeover is Upstart-friendly:** stop/start `lab126_gui`; never raw-kill
-   Amazon GUI as the recovery strategy. Always restore GUI after tests when you
+3. **UI takeover is Upstart-friendly:** stop/start the `x` job (not only
+   `lab126_gui`); never raw-kill Amazon GUI as the recovery strategy. Restore with
+   `start x` **and** `start lab126_gui`. Always restore GUI after tests when you
    stopped it.
 4. **Privileged page APIs** must stay origin-gated (`trusted_origins` in config).
 5. **Entropy:** Kindle kernels often sit under AWS-LC’s 256-bit `RNDGETENTCNT`
@@ -164,8 +165,9 @@ Control methods: `status`, `open`, `eval`, `emit`, `refresh`, `reload-config`, `
 `open` is origin-allowlisted. `reload-config` hot-applies non-structural settings;
 structural changes return `restart_required`.
 
-Lifecycle (`lifecycle.enabled = true`): marker + stop `lab126_gui` + heartbeat;
-cleanup must `start lab126_gui`. Independent helper: `scripts/ped-watchdog.sh`.
+Lifecycle (`lifecycle.enabled = true`): marker + stop `x` (cascades GUI) +
+heartbeat; cleanup must `start x` then `start lab126_gui` (and best-effort wait
+for framework). Independent helper: `scripts/ped-watchdog.sh`.
 
 Config paths: `Config::load` should canonicalize so relative `page.url` / asset
 roots resolve when cwd differs from the toml location.
@@ -261,14 +263,14 @@ Promise-returning JS checked via `eval` often needs a window latch + sleep;
 | `[[patch.unused]]` mozjs_sys | Fork version ≠ 153.0.0-0 |
 | fbink missing `eink/mxcfb-kindle.h` / `stb/stb_image.h` | Incomplete vendor set |
 | Host build fails freetype/zlib | Use ARMv7 cross env, not host-as-authority |
-| GUI gone after crash | Lifecycle/watchdog; manually `start lab126_gui` |
+| GUI gone after crash | Lifecycle/watchdog; manually `start x && start lab126_gui` |
 
 ## What not to do
 
 - Do not add Mesa/X11 as required runtime for PED mainline.
 - Do not publish whole `cargo vendor` crate dumps into this repo.
 - Do not force-push shared forks (`servo`/`mozjs`) without explicit instruction.
-- Do not leave the device with `lab126_gui` stopped after a session you started.
+- Do not leave the device with `x` / `lab126_gui` stopped after a session you started.
 - Do not expand FBInk vendor to “entire upstream tree” without need; keep the
   Kindle IMAGE subset.
 

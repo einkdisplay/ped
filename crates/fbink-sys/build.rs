@@ -25,7 +25,10 @@ fn main() {
         println!(
             "cargo:rerun-if-changed={}",
             if rel.starts_with("../") {
-                manifest_dir.join(rel.trim_start_matches("../")).display().to_string()
+                manifest_dir
+                    .join(rel.trim_start_matches("../"))
+                    .display()
+                    .to_string()
             } else {
                 fbink_dir.join(rel).display().to_string()
             }

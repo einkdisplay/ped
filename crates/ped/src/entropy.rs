@@ -11,12 +11,12 @@ use std::fs;
 use std::io::{self, Write};
 use std::os::fd::RawFd;
 use std::path::Path;
-use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::thread::{self, JoinHandle};
 use std::time::{Duration, Instant};
 
-use libc::{c_int, close, ioctl, open, O_RDWR};
+use libc::{O_RDWR, c_int, close, ioctl, open};
 use rand_core::RngCore;
 use rand_jitter::JitterRng;
 
@@ -46,10 +46,7 @@ impl EntropyGuard {
             .name("ped-entropy".to_owned())
             .spawn(move || maintain_loop(stop_thread))
             .ok();
-        Self {
-            stop,
-            thread,
-        }
+        Self { stop, thread }
     }
 }
 

@@ -47,8 +47,12 @@ KUAL and Scriptlet launch assets are under `apps/kual/` and `apps/scriptlet/`.
 An independent lifecycle helper is available as `scripts/ped-watchdog.sh`. They
 use the same binary and control path. Set `lifecycle.enabled = true` only on a
 jailbroken Kindle where `/dev/fb0` and `/sbin/start`/`/sbin/stop` exist. PED
-then records a marker, stops `lab126_gui`, and attempts to restore it during
-cleanup.
+then records a marker, stops the Upstart `x` job (which cascades through
+`lab126_gui` / framework / pillow and tears down Xorg+awesome+blanket), and on
+cleanup runs `start x` then `start lab126_gui`. Stopping only `lab126_gui` is not
+enough for a quiet fb0 takeover; starting only `lab126_gui` after `x` was stopped
+can leave the device on the boot progress bar until framework is explicitly
+brought back.
 
 ## Browser API
 

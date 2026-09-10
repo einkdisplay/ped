@@ -22,7 +22,14 @@ impl Rect {
         }
     }
 
-    pub fn from_css(x: f64, y: f64, width: f64, height: f64, frame_w: u32, frame_h: u32) -> Option<Self> {
+    pub fn from_css(
+        x: f64,
+        y: f64,
+        width: f64,
+        height: f64,
+        frame_w: u32,
+        frame_h: u32,
+    ) -> Option<Self> {
         if width <= 0.0 || height <= 0.0 || frame_w == 0 || frame_h == 0 {
             return None;
         }
@@ -402,7 +409,10 @@ mod tests {
 
     #[test]
     fn orientation_aliases_parse() {
-        assert_eq!(Orientation::parse("portrait").unwrap(), Orientation::Portrait);
+        assert_eq!(
+            Orientation::parse("portrait").unwrap(),
+            Orientation::Portrait
+        );
         assert_eq!(Orientation::parse("90").unwrap(), Orientation::Landscape);
         assert_eq!(
             Orientation::parse("landscape-ccw").unwrap(),

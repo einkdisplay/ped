@@ -137,11 +137,7 @@ fn lipc_get(service: &str, property: &str) -> Option<String> {
         return None;
     }
     let value = String::from_utf8_lossy(&output.stdout).trim().to_owned();
-    if value.is_empty() {
-        None
-    } else {
-        Some(value)
-    }
+    if value.is_empty() { None } else { Some(value) }
 }
 
 fn read_trimmed(path: &str) -> Option<String> {

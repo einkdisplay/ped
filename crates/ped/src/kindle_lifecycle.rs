@@ -1,17 +1,25 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
-use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::thread::{self, JoinHandle};
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 use serde::{Deserialize, Serialize};
 
+/// Root Upstart job that owns Xorg/awesome/blanket (`lxinit`).
+/// Stopping it cascades to `lab126_gui` and the Java framework.
+const KINDLE_X_SERVICE: &str = "x";
+/// App/framework umbrella job. Manual `start x` does **not** revive this after
+/// boot because `lab126_gui` waits on one-shot `n_ready` + `langpicker_ready`.
+const KINDLE_GUI_SERVICE: &str = "lab126_gui";
+
 #[derive(Clone, Debug)]
 pub struct LifecycleConfig {
     pub enabled: bool,
     pub marker: PathBuf,
+    /// Root service stopped for fb0 takeover. Prefer `x` over `lab126_gui`.
     pub service: String,
     pub stop_timeout: Duration,
     pub watchdog_timeout: Duration,
@@ -128,33 +136,15 @@ impl LifecycleGuard {
     }
 
     fn stop_service(&self) -> Result<(), String> {
-        run_service_command("stop", &self.config.service)?;
-        let deadline = Instant::now() + self.config.stop_timeout;
-        while Instant::now() < deadline {
-            if !service_is_running(&self.config.service) {
-                return Ok(());
-            }
-            thread::sleep(Duration::from_millis(100));
-        }
-        Err(format!(
-            "Kindle UI service {} did not stop before timeout",
-            self.config.service
-        ))
+        // Prefer stopping the configured root job. Default is `x`, which also
+        // tears down lab126_gui / framework / pillow via Upstart edges. Stopping
+        // only lab126_gui leaves Xorg+awesome+blanket alive (title bar clock,
+        // touch routing, etc.).
+        ensure_service_stopped(&self.config.service, self.config.stop_timeout)
     }
 
     fn restore_service(&self) -> Result<(), String> {
-        run_service_command("start", &self.config.service)?;
-        let deadline = Instant::now() + self.config.stop_timeout;
-        while Instant::now() < deadline {
-            if service_is_running(&self.config.service) {
-                return Ok(());
-            }
-            thread::sleep(Duration::from_millis(100));
-        }
-        Err(format!(
-            "Kindle UI service {} did not restart before timeout",
-            self.config.service
-        ))
+        restore_kindle_ui(self.config.stop_timeout)
     }
 
     fn remove_marker(&self) -> Result<(), String> {
@@ -211,7 +201,7 @@ impl LifecycleGuard {
                 config.marker.display()
             ));
         }
-        let _ = run_service_command("start", &config.service);
+        let _ = restore_kindle_ui(config.stop_timeout);
         match fs::remove_file(&config.marker) {
             Ok(()) | Err(_) => Ok(()),
         }
@@ -224,15 +214,83 @@ impl Drop for LifecycleGuard {
     }
 }
 
+fn restore_kindle_ui(timeout: Duration) -> Result<(), String> {
+    // Full UI bring-up is two-step on modern FW:
+    //   1) start x            -> Xorg / awesome / blanket / winmgr
+    //   2) start lab126_gui   -> framework / pillow / chrome / apps
+    // `start x` alone never re-emits boot-only `n_ready`, so lab126_gui stays down
+    // and the user can sit on the tree progress bar with no framework.
+    ensure_service_started(KINDLE_X_SERVICE, timeout)?;
+    ensure_service_started(KINDLE_GUI_SERVICE, timeout)?;
+    // Framework/CVM can take tens of seconds after lab126_gui is "running".
+    // Wait best-effort so splash teardown has a chance to finish; do not fail
+    // restore if lipc is slow (marker cleanup still happens).
+    let _ = wait_for_framework_started(timeout.saturating_mul(4).max(Duration::from_secs(90)));
+    let _ = start_home_app();
+    Ok(())
+}
+
+fn ensure_service_stopped(service: &str, timeout: Duration) -> Result<(), String> {
+    if !service_is_running(service) {
+        return Ok(());
+    }
+    match run_service_command("stop", service) {
+        Ok(()) => {}
+        Err(error) if !service_is_running(service) => {
+            // Already stopped races as "Unknown instance".
+            let _ = error;
+        }
+        Err(error) => return Err(error),
+    }
+    wait_until(timeout, || !service_is_running(service))
+        .map_err(|_| format!("Kindle UI service {service} did not stop before timeout"))
+}
+
+fn ensure_service_started(service: &str, timeout: Duration) -> Result<(), String> {
+    if service_is_running(service) {
+        return Ok(());
+    }
+    match run_service_command("start", service) {
+        Ok(()) => {}
+        Err(error) if service_is_running(service) => {
+            // Already running races as "Job is already running".
+            let _ = error;
+        }
+        Err(error) => return Err(error),
+    }
+    wait_until(timeout, || service_is_running(service))
+        .map_err(|_| format!("Kindle UI service {service} did not restart before timeout"))
+}
+
 fn run_service_command(action: &str, service: &str) -> Result<(), String> {
-    let status = Command::new(format!("/sbin/{action}"))
+    let output = Command::new(format!("/sbin/{action}"))
         .arg(service)
-        .status()
+        .output()
         .map_err(|error| format!("cannot run /sbin/{action} {service}: {error}"))?;
-    if status.success() {
-        Ok(())
+    if output.status.success() {
+        return Ok(());
+    }
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    let detail = format!("{stdout}{stderr}").trim().to_owned();
+    if action == "start" && detail.contains("already running") {
+        return Ok(());
+    }
+    if action == "stop"
+        && (detail.contains("Unknown instance") || detail.contains("already been stopped"))
+    {
+        return Ok(());
+    }
+    if detail.is_empty() {
+        Err(format!(
+            "/sbin/{action} {service} failed with {}",
+            output.status
+        ))
     } else {
-        Err(format!("/sbin/{action} {service} failed with {status}"))
+        Err(format!(
+            "/sbin/{action} {service} failed with {}: {detail}",
+            output.status
+        ))
     }
 }
 
@@ -242,9 +300,51 @@ fn service_is_running(service: &str) -> bool {
         .output()
         .map(|output| {
             let text = String::from_utf8_lossy(&output.stdout);
-            output.status.success() && text.contains("start/running")
+            text.contains("start/running")
         })
         .unwrap_or(false)
+}
+
+fn wait_until(timeout: Duration, mut predicate: impl FnMut() -> bool) -> Result<(), ()> {
+    let deadline = Instant::now() + timeout;
+    while Instant::now() < deadline {
+        if predicate() {
+            return Ok(());
+        }
+        thread::sleep(Duration::from_millis(100));
+    }
+    if predicate() { Ok(()) } else { Err(()) }
+}
+
+fn wait_for_framework_started(timeout: Duration) -> bool {
+    wait_until(timeout, framework_is_started).is_ok()
+}
+
+fn framework_is_started() -> bool {
+    // lipc-get-prop prints the value on stdout when successful.
+    Command::new("lipc-get-prop")
+        .args(["-eiq", "com.lab126.kaf", "frameworkStarted"])
+        .output()
+        .map(|output| {
+            output.status.success() && String::from_utf8_lossy(&output.stdout).trim().eq("1")
+        })
+        .unwrap_or(false)
+}
+
+fn start_home_app() -> Result<(), String> {
+    let status = Command::new("lipc-set-prop")
+        .args([
+            "com.lab126.appmgrd",
+            "start",
+            "app://com.lab126.booklet.home",
+        ])
+        .status()
+        .map_err(|error| format!("cannot request home app: {error}"))?;
+    if status.success() {
+        Ok(())
+    } else {
+        Err(format!("lipc home start failed with {status}"))
+    }
 }
 
 fn process_exists(pid: u32) -> bool {
@@ -264,14 +364,13 @@ mod tests {
 
     #[test]
     fn disabled_lifecycle_is_a_noop() {
-        let guard = LifecycleGuard::acquire(LifecycleConfig {
+        let _guard = LifecycleGuard::acquire(LifecycleConfig {
             enabled: false,
             marker: PathBuf::from("/tmp/ped-test-marker"),
-            service: "lab126_gui".to_owned(),
+            service: KINDLE_X_SERVICE.to_owned(),
             stop_timeout: Duration::from_millis(1),
             watchdog_timeout: Duration::from_secs(30),
         })
         .unwrap();
-        assert!(true); // disabled acquire is a noop
     }
 }

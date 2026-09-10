@@ -125,8 +125,9 @@ impl Default for LifecycleConfig {
         Self {
             enabled: false,
             marker: PathBuf::from("/var/run/ped/session.json"),
-            service: "lab126_gui".to_owned(),
-            stop_timeout_ms: 3000,
+            // Root Upstart job: stop `x` (not only lab126_gui) so Xorg/awesome go away.
+            service: "x".to_owned(),
+            stop_timeout_ms: 5000,
             watchdog_timeout_s: 30,
         }
     }
@@ -274,7 +275,10 @@ impl Config {
                     .host_str()
                     .is_none_or(|host| host == "127.0.0.1" || host == "localhost");
         }
-        self.page.trusted_origins.iter().any(|origin| origin_matches(origin, candidate))
+        self.page
+            .trusted_origins
+            .iter()
+            .any(|origin| origin_matches(origin, candidate))
     }
 
     pub fn apply_runtime_reload(&mut self, next: Config) -> Result<ReloadReport, String> {
@@ -322,7 +326,6 @@ pub struct ReloadReport {
     pub restart_required: bool,
     pub messages: Vec<String>,
 }
-
 
 fn origin_matches(configured: &str, candidate: &Url) -> bool {
     let Ok(allowed) = Url::parse(configured) else {
