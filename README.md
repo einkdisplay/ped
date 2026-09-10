@@ -7,6 +7,10 @@
 PED (Potato E-Ink Display) is a tool that makes it easy to turn a Kindle into a
 custom screen.
 
+*Showcase: Kindle Paperwhite 3 showing [the reference dashboard](https://github.com/einkdisplay/dashboard) with PED*
+
+![A photo showing a Kindle Paperwhite 3 with PED running, showing a dashboard page](https://github.com/einkdisplay/dashboard/blob/7f081f6d82c23a52bbd7fff7ea520a6e816a99a5/assets/photo.jpg)
+
 ## Introduction
 
 PED is a web browser. It opens a single tab, renders pages on the CPU, and
