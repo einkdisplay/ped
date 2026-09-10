@@ -1,2 +1,19 @@
+# Toolbox / Fedora Atomic: `cross` talks to host Podman over the user socket.
+# That is not a separate machine. Bind mounts from the toolbox namespace are
+# unreliable, so run with:
+#   CONTAINER_HOST=unix:///run/user/1000/podman/podman.sock
+#   DOCKER_HOST=unix:///run/user/1000/podman/podman.sock
+#   CROSS_CONTAINER_ENGINE=podman
+#   CROSS_REMOTE=1
+#   CROSS_REMOTE_COPY_CACHE=1
+# CROSS_REMOTE copies the project into the build container. COPY_CACHE also
+# copies target/ so incremental ARMv7 artifacts are reused.
+
 [target.armv7-unknown-linux-musleabihf]
 image = "localhost/ped-servo-cross:armv7-musl"
+
+[build.env]
+passthrough = [
+    "CFLAGS_armv7-unknown-linux-musleabihf",
+    "CXXFLAGS_armv7-unknown-linux-musleabihf",
+]
